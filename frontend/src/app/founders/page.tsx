@@ -3,81 +3,84 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Shield, Users, Code2, Star, Send, CheckCircle, Loader2, AlertCircle, ExternalLink } from 'lucide-react'
+import { 
+  Shield, 
+  Users, 
+  Code2, 
+  Star, 
+  Send, 
+  CheckCircle, 
+  Loader2, 
+  AlertCircle, 
+  ExternalLink, 
+  Menu, 
+  X, 
+  Mail, 
+  Globe,
+  ArrowRight
+} from 'lucide-react'
 import axios from 'axios'
-import ChatBot from '@/components/ui/ChatBot'
+import dynamic from 'next/dynamic'
+
+const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-const TYPE_CONFIG: Record<string, { label: string; color: string; emoji: string }> = {
-  founder:   { label: '★ Founder',  color: '#f59e0b', emoji: '★' },
-  developer: { label: '⚡ Developer',color: '#3b82f6', emoji: '⚡' },
-  advisor:   { label: '◈ Advisor',  color: '#a78bfa', emoji: '◈' },
+const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  founder:   { label: 'Founding Member',  color: '#0A2A66', bg: '#EFF6FF' },
+  developer: { label: 'System Architect', color: '#6366F1', bg: '#EEF2FF' },
+  advisor:   { label: 'Strategic Advisor', color: '#059669', bg: '#ECFDF5' },
 }
 
 function PersonCard({ person }: { person: any }) {
   const cfg = TYPE_CONFIG[person.type] || TYPE_CONFIG.developer
   return (
-    <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-      whileHover={{ y: -6 }} transition={{ duration: 0.35 }}
-      className="glass-card p-6 group"
-      style={{ border: `1px solid ${cfg.color}18` }}>
-
-      {/* Avatar */}
-      <div className="relative w-20 h-20 mx-auto mb-4">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} 
+      whileInView={{ opacity: 1, y: 0 }} 
+      viewport={{ once: true }}
+      className="gov-card p-0 overflow-hidden group hover:shadow-2xl transition-all duration-500 border-slate-200">
+      
+      <div className="relative h-64 bg-slate-100 overflow-hidden">
         {person.image_url ? (
           <img src={person.image_url} alt={person.name}
-            className="w-20 h-20 rounded-2xl object-cover" />
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : (
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black"
-            style={{ background: `linear-gradient(135deg, ${cfg.color}20, ${cfg.color}08)`, border: `2px solid ${cfg.color}30`, color: cfg.color }}>
+          <div className="w-full h-full flex items-center justify-center text-4xl font-black bg-slate-50 text-[#0A2A66]">
             {person.name.charAt(0)}
           </div>
         )}
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg border border-white/20 text-[10px] font-black uppercase tracking-widest text-[#0A2A66] shadow-sm">
+           {cfg.label}
+        </div>
       </div>
 
-      {/* Badge */}
-      <div className="flex justify-center mb-3">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold"
-          style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}25` }}>
-          {cfg.label}
-        </span>
-      </div>
+      <div className="p-8">
+        <h3 className="text-2xl font-bold text-[#0A2A66] mb-1">{person.name}</h3>
+        <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">{person.role}</p>
+        <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8 h-20 overflow-hidden text-ellipsis line-clamp-3">
+          {person.bio}
+        </p>
 
-      <h3 className="text-white font-bold text-lg text-center mb-1">{person.name}</h3>
-      <p className="text-xs font-medium text-center mb-3" style={{ color: cfg.color }}>{person.role}</p>
-      <p className="text-slate-400 text-sm text-center leading-relaxed mb-5">{person.bio}</p>
-
-      {/* Social links */}
-      <div className="flex justify-center gap-3 flex-wrap">
-        {person.linkedin && (
-          <a href={person.linkedin} target="_blank" rel="noopener"
-            className="text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-blue-400 transition-all"
-            style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(59,130,246,0.05)' }}>
-            LinkedIn <ExternalLink className="w-3 h-3 inline-block ml-1 opacity-60" />
-          </a>
-        )}
-        {person.github && (
-          <a href={person.github} target="_blank" rel="noopener"
-            className="text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all"
-            style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
-            GitHub <ExternalLink className="w-3 h-3 inline-block ml-1 opacity-60" />
-          </a>
-        )}
-        {person.twitter && (
-          <a href={person.twitter} target="_blank" rel="noopener"
-            className="text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-cyan-400 transition-all"
-            style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(34,211,238,0.04)' }}>
-            X.com <ExternalLink className="w-3 h-3 inline-block ml-1 opacity-60" />
-          </a>
-        )}
-        {person.email && (
-          <a href={`mailto:${person.email}`}
-            className="text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-green-400 transition-all"
-            style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(16,185,129,0.04)' }}>
-            Email <ExternalLink className="w-3 h-3 inline-block ml-1 opacity-60" />
-          </a>
-        )}
+        <div className="pt-6 border-t w-full flex justify-between items-center">
+           <div className="flex gap-4">
+              {person.linkedin && (
+                <a href={person.linkedin} target="_blank" rel="noopener" className="text-slate-400 hover:text-blue-600 transition-colors">
+                  <ExternalLink className="w-5 h-5" />
+                </a>
+              )}
+              {person.github && (
+                <a href={person.github} target="_blank" rel="noopener" className="text-slate-400 hover:text-black transition-colors">
+                  <Globe className="w-5 h-5" />
+                </a>
+              )}
+           </div>
+           {person.email && (
+             <a href={`mailto:${person.email}`} className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 uppercase tracking-widest">
+               <Mail className="w-4 h-4" /> Message
+             </a>
+           )}
+        </div>
       </div>
     </motion.div>
   )
@@ -86,6 +89,8 @@ function PersonCard({ person }: { person: any }) {
 export default function FoundersPage() {
   const [team, setTeam] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [mobileMenu, setMobileMenu] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   // Contact form
   const [form, setForm]     = useState({ name: '', email: '', subject: '', message: '' })
@@ -94,15 +99,16 @@ export default function FoundersPage() {
   const [sendErr, setSendErr] = useState('')
 
   useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    
     axios.get(`${API}/api/v1/founders/`)
       .then(r => setTeam(r.data))
       .catch(() => setTeam([]))
       .finally(() => setLoading(false))
-  }, [])
 
-  const founders   = team.filter(p => p.type === 'founder')
-  const developers = team.filter(p => p.type === 'developer')
-  const advisors   = team.filter(p => p.type === 'advisor')
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleContact = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,190 +118,154 @@ export default function FoundersPage() {
       await axios.post(`${API}/api/v1/contact/`, form)
       setSent(true)
     } catch {
-      setSendErr('Failed to send message. Please try again or email us directly.')
+      setSendErr('Administrative dispatch failed. Please verify your connection.')
     } finally { setSending(false) }
   }
 
+  const founders   = team.filter(p => p.type === 'founder')
+  const developers = team.filter(p => p.type === 'developer')
+
   return (
-    <div className="min-h-screen">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
-        style={{ background: 'rgba(0,8,40,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-[#F5F7FA]">
+      
+      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
+      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-5'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3b82f6, #22d3ee)' }}>
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black text-white tracking-wide">ARVIX LABS</span>
+             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+             </div>
+             <span className="font-display font-black text-[#0A2A66] text-2xl tracking-tighter">ARVIX LABS</span>
           </Link>
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/"             className="text-slate-400 hover:text-white transition-colors">Home</Link>
-            <Link href="/grievance"    className="text-slate-400 hover:text-white transition-colors">Grievance</Link>
-            <Link href="/technologies" className="text-slate-400 hover:text-white transition-colors">Technologies</Link>
-            <Link href="/founders"     className="text-white font-medium">About</Link>
+          <div className="hidden lg:flex items-center gap-10">
+            {['Home', 'Grievance', 'Technologies', 'Analytics', 'Founders'].map(l => (
+              <Link key={l} href={l === 'Home' ? '/' : `/${l.toLowerCase()}`} className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">
+                {l}
+              </Link>
+            ))}
           </div>
+          <Link href="/grievance" className="hidden lg:block gov-gradient-button px-6 py-2.5 text-sm">Submit Grievance</Link>
         </div>
       </nav>
 
-      <div className="pt-28 pb-20 px-6">
-        <div className="max-w-7xl mx-auto space-y-24">
+      <div className="pt-20 pb-32 px-6 overflow-hidden relative">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+        <div className="max-w-7xl mx-auto space-y-32 relative z-10">
 
           {/* Hero */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-blue-300 mb-6"
-              style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)' }}>
-              <Users className="w-3.5 h-3.5" /> The Arvix Labs Team
-            </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-6">
-              Built with <span className="gradient-text">Purpose.</span><br />
-              Driven by <span className="gradient-text-gold">Vision.</span>
-            </h1>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-              Arvix Labs was founded on the belief that AI should democratize access to government data
-              and make institutions more transparent, accountable, and efficient.
-            </p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-4xl mx-auto">
+             <h1 className="text-5xl md:text-7xl font-display font-black text-[#0A2A66] mb-8 tracking-tight leading-[1.1]">
+                Visionary <span className="gradient-text">Leadership</span> behind Arvix
+             </h1>
+             <p className="text-slate-500 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto">
+                Our Founding Council and System Architects are dedicated to bridging the gap between public service and frontier AI intelligence.
+             </p>
           </motion.div>
 
-          {/* Mission */}
-          <div className="grid md:grid-cols-3 gap-6">
+          {/* Pillars */}
+          <div className="grid md:grid-cols-3 gap-10">
             {[
-              { icon: Shield, title: 'Our Mission',  desc: 'Democratize access to government intelligence through AI-powered data systems and platforms.', color: '#3b82f6' },
-              { icon: Star,   title: 'Our Vision',   desc: 'Every government decision backed by real-time data. Every citizen query resolved with intelligence.', color: '#f59e0b' },
-              { icon: Code2,  title: 'Our Stack',    desc: 'Gemini AI + FAISS RAG pipeline + real-time analytics — built for government-grade reliability and scale.', color: '#22d3ee' },
-            ].map((c, i) => {
-              const Icon = c.icon
-              return (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="glass-card p-6 text-center">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-                    style={{ background: `${c.color}15`, border: `1px solid ${c.color}30` }}>
-                    <Icon className="w-6 h-6" style={{ color: c.color }} />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-2">{c.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{c.desc}</p>
-                </motion.div>
-              )
-            })}
+              { icon: Shield, title: 'Institutional Trust',  desc: 'Auditable transparency in every transaction.', color: '#0A2A66' },
+              { icon: Users,   title: 'Human-Centric',   desc: 'Design that prioritizes ease of access for all citizens.', color: '#3B82F6' },
+              { icon: Code2,  title: 'Engineering Rigor',    desc: 'Powered by Gemini 2.0 and state-of-the-art RAG.', color: '#6366F1' },
+            ].map((c, i) => (
+              <div key={i} className="text-center p-12 gov-card border-slate-100 hover:bg-white hover:shadow-xl transition-all">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-8 bg-slate-50 group-hover:bg-blue-50 transition-colors" style={{ color: c.color }}>
+                  <c.icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">{c.title}</h3>
+                <p className="text-slate-500 text-sm font-medium leading-relaxed">{c.desc}</p>
+              </div>
+            ))}
           </div>
 
-          {/* Founders Section */}
-          {(loading || founders.length > 0) && (
-            <section>
-              <div className="text-center mb-12">
-                <p className="text-xs font-bold text-yellow-400 uppercase tracking-[0.3em] mb-3">Leadership</p>
-                <h2 className="text-3xl font-black text-white">Our Founders</h2>
+          {/* Leadership */}
+          <div className="space-y-16">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b pb-8">
+               <div>
+                  <h2 className="text-4xl font-display font-black tracking-tight">Founding Council</h2>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-2">Executive Leadership & Strategic Direction</p>
+               </div>
+               <div className="px-4 py-2 bg-blue-50 rounded-lg text-blue-600 text-xs font-bold uppercase tracking-widest">
+                  Board Certified 2024
+               </div>
+            </div>
+            
+            {loading ? (
+              <div className="grid md:grid-cols-3 gap-8">
+                {[1,2,3].map(i => <div key={i} className="h-[400px] rounded-2xl bg-slate-100 shimmer" />)}
               </div>
-              {loading ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1,2].map(i => <div key={i} className="glass-card p-6 h-72 shimmer rounded-2xl" />)}
-                </div>
-              ) : (
-                <div className="flex flex-wrap justify-center gap-6">
-                  {founders.map(p => <div key={p.id} className="w-full md:w-80"><PersonCard person={p} /></div>)}
-                </div>
-              )}
-            </section>
-          )}
+            ) : (
+              <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                {founders.map(person => <PersonCard key={person.name} person={person} />)}
+              </div>
+            )}
+          </div>
 
-          {/* Developers */}
+          {/* Engineering */}
           {!loading && developers.length > 0 && (
-            <section>
-              <div className="text-center mb-12">
-                <p className="text-xs font-bold text-blue-400 uppercase tracking-[0.3em] mb-3">Engineering</p>
-                <h2 className="text-3xl font-black text-white">Our Developers</h2>
+            <div className="space-y-16">
+              <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b pb-8">
+                 <div>
+                    <h2 className="text-4xl font-display font-black tracking-tight">Technical Team</h2>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-2">System Architects & Intelligence Engineers</p>
+                 </div>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {developers.map(p => <PersonCard key={p.id} person={p} />)}
+              <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                {developers.map(person => <PersonCard key={person.name} person={person} />)}
               </div>
-            </section>
-          )}
-
-          {/* Advisors */}
-          {!loading && advisors.length > 0 && (
-            <section>
-              <div className="text-center mb-12">
-                <p className="text-xs font-bold text-purple-400 uppercase tracking-[0.3em] mb-3">Advisory Board</p>
-                <h2 className="text-3xl font-black text-white">Our Advisors</h2>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {advisors.map(p => <PersonCard key={p.id} person={p} />)}
-              </div>
-            </section>
-          )}
-
-          {/* Empty state */}
-          {!loading && team.length === 0 && (
-            <div className="glass-card p-16 text-center">
-              <Users className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-500">Team profiles coming soon.</p>
             </div>
           )}
 
-          {/* Contact Form */}
-          <section id="contact">
-            <div className="max-w-2xl mx-auto">
-              <div className="text-center mb-12">
-                <p className="text-xs font-bold text-blue-400 uppercase tracking-[0.3em] mb-3">Get in Touch</p>
-                <h2 className="text-3xl font-black text-white">Contact Us</h2>
-                <p className="text-slate-400 mt-3">Have a question, partnership idea, or want to collaborate?</p>
-              </div>
+          {/* Inquiry Center */}
+          <div className="max-w-4xl mx-auto">
+             <div className="gov-card p-0 overflow-hidden bg-white shadow-2xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                   <div className="p-16 bg-[#0A2A66] text-white space-y-8">
+                      <h2 className="text-4xl font-display font-black tracking-tight">Official Inquiry Center</h2>
+                      <p className="text-white/60 font-medium">For corporate partnerships, media consultations, or institutional requirements.</p>
+                      
+                      <div className="space-y-6 pt-8">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center"><Mail className="w-5 h-5 text-blue-400" /></div>
+                            <span className="text-sm font-bold">hq@arvixlabs.gov.in</span>
+                         </div>
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center"><Globe className="w-5 h-5 text-blue-400" /></div>
+                            <span className="text-sm font-bold">Administrative Block, Cyberabad</span>
+                         </div>
+                      </div>
+                   </div>
 
-              {sent ? (
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                  className="glass-card p-12 text-center" style={{ border: '1px solid rgba(16,185,129,0.3)' }}>
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
-                    style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid rgba(16,185,129,0.4)' }}>
-                    <CheckCircle className="w-7 h-7 text-green-400" />
-                  </div>
-                  <h3 className="text-xl font-black text-white mb-2">Message Received!</h3>
-                  <p className="text-slate-400">We'll get back to you as soon as possible.</p>
-                  <button onClick={() => { setSent(false); setForm({ name:'', email:'', subject:'', message:'' }) }}
-                    className="mt-6 btn-outline-glow px-6 py-2.5">Send Another</button>
-                </motion.div>
-              ) : (
-                <div className="glass-card p-8" style={{ border: '1px solid rgba(59,130,246,0.2)' }}>
-                  <form onSubmit={handleContact} className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Name *</label>
-                        <input required className="input-glass" placeholder="Your name"
-                          value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Email *</label>
-                        <input required type="email" className="input-glass" placeholder="your@email.com"
-                          value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Subject</label>
-                      <input className="input-glass" placeholder="Partnership / General / Career"
-                        value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Message *</label>
-                      <textarea required rows={5} className="input-glass resize-none"
-                        placeholder="Tell us how we can help or collaborate…"
-                        value={form.message} onChange={e => setForm({...form, message: e.target.value})} />
-                    </div>
-                    {sendErr && (
-                      <p className="text-red-400 text-sm flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4" />{sendErr}
-                      </p>
-                    )}
-                    <button type="submit" disabled={sending || !form.name || !form.email || !form.message}
-                      className="w-full btn-glow text-white justify-center py-3.5 disabled:opacity-50">
-                      {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</> : <><Send className="w-4 h-4" /> Send Message</>}
-                    </button>
-                  </form>
+                   <div className="p-16">
+                      {sent ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+                           <div className="w-20 h-20 rounded-full bg-green-50 text-green-600 flex items-center justify-center"><CheckCircle className="w-10 h-10" /></div>
+                           <h3 className="text-2xl font-bold">Dispatch Confirmed</h3>
+                           <p className="text-slate-500 font-medium text-sm">Our administration will respond within 48 business hours.</p>
+                           <button onClick={() => setSent(false)} className="gov-button-outline px-8">New Message</button>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleContact} className="space-y-6">
+                           <input required className="gov-input" placeholder="Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                           <input required type="email" className="gov-input" placeholder="Official Email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                           <textarea required rows={5} className="gov-input resize-none" placeholder="Administrative or Technical requirements..." value={form.message} onChange={e => setForm({...form, message: e.target.value})} />
+                           <button type="submit" disabled={sending} className="w-full gov-gradient-button py-4 text-lg">
+                              {sending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Send Official Inquiry'}
+                           </button>
+                        </form>
+                      )}
+                   </div>
                 </div>
-              )}
-            </div>
-          </section>
+             </div>
+          </div>
 
         </div>
       </div>
+
+      <footer className="bg-white py-12 px-6 border-t mt-auto text-center font-display font-black uppercase tracking-[0.2em] text-[10px] text-slate-400">
+         © 2024 Arvix Labs — Official Leadership Directory
+      </footer>
 
       <ChatBot />
     </div>

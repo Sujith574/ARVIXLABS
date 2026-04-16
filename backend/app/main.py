@@ -4,11 +4,18 @@ from contextlib import asynccontextmanager
 from app.api.v1 import auth, cms, ai, analytics, founders, media, grievances, technologies, contact
 import uvicorn
 
+from app.db.database import Base, engine
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("✅ Arvix Labs API — started")
+    # Auto-create tables for demo resilience
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("[SERVER] Arvix Labs API started (Tables verified)")
+    except Exception as e:
+        print(f"[SERVER] Table verification skipped: {e}")
     yield
-    print("🔴 Arvix Labs API — shutdown")
+    print("[SERVER] Arvix Labs API shutdown")
 
 app = FastAPI(
     title="Arvix Labs API",
@@ -21,7 +28,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://arvix-frontend-666036188871.asia-south1.run.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

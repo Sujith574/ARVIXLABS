@@ -28,8 +28,16 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # Email (OTP)
+    MAIL_USERNAME: str = "arvixlabs@gmail.com"
+    MAIL_PASSWORD: str = "iuai xkil dyft rzjf"
+    MAIL_FROM: str = "arvixlabs@gmail.com"
+    MAIL_PORT: int = 465
+    MAIL_SERVER: str = "smtp.gmail.com"
+
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 @lru_cache()
 def get_settings():

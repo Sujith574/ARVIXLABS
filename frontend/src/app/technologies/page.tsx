@@ -1,183 +1,213 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Shield, Zap, CheckCircle, Clock, FlaskConical, ArrowRight, ExternalLink } from 'lucide-react'
-import axios from 'axios'
-import ChatBot from '@/components/ui/ChatBot'
+import { 
+  Shield, 
+  Cpu, 
+  Database, 
+  Zap, 
+  Lock, 
+  Globe, 
+  ArrowRight, 
+  Menu, 
+  X,
+  Code2,
+  Layers,
+  Activity,
+  Server,
+  CheckCircle
+} from 'lucide-react'
+import dynamic from 'next/dynamic'
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
-const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: any }> = {
-  Production: { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  icon: CheckCircle },
-  Beta:       { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: Zap },
-  Prototype:  { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)',icon: FlaskConical },
-}
-
-const CATEGORY_COLORS: Record<string, string> = {
-  AI: '#3b82f6', Platform: '#22d3ee', Analytics: '#f59e0b',
-  Security: '#ef4444', Infrastructure: '#a78bfa', Technology: '#10b981',
-}
+const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
 export default function TechnologiesPage() {
-  const [techs, setTechs]       = useState<any[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [filter, setFilter]     = useState('All')
-  const [categories, setCategories] = useState<string[]>([])
+  const [mobileMenu, setMobileMenu] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    axios.get(`${API}/api/v1/technologies/`)
-      .then(r => {
-        setTechs(r.data)
-        const cats = Array.from(new Set(r.data.map((t: any) => t.category))) as string[]
-        setCategories(['All', ...cats])
-      })
-      .catch(() => {
-        // Placeholder when backend is offline
-        const fallback = [
-          { id:'1', title:'Arvix AI', description:'Context-aware government intelligence engine powered by Gemini 1.5 and FAISS RAG pipeline for instant policy and data Q&A.', use_case:'Real-time citizen query resolution, policy document search, anomaly detection.', status:'Production', category:'AI', image_url:'' },
-          { id:'2', title:'Grievance Intelligence', description:'ML-based complaint auto-classification, priority scoring, and department routing system.', use_case:'Government departments, municipalities, civic grievance cells.', status:'Production', category:'Platform', image_url:'' },
-          { id:'3', title:'Data Analytics Suite', description:'Real-time dashboards, trend analysis, and visual reporting for government transparency.', use_case:'Department KPI tracking, public accountability reports, audit trails.', status:'Beta', category:'Analytics', image_url:'' },
-          { id:'4', title:'FraudGuard AI', description:'AI-powered anomaly and fraud detection in government procurement and financial data.', use_case:'Anti-corruption bureaus, financial auditors, procurement departments.', status:'Prototype', category:'Security', image_url:'' },
-        ]
-        setTechs(fallback)
-        setCategories(['All', 'AI', 'Platform', 'Analytics', 'Security'])
-      })
-      .finally(() => setLoading(false))
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const visible = filter === 'All' ? techs : techs.filter(t => t.category === filter)
+  const technologies = [
+    {
+      title: 'Gemini 2.0 Flash',
+      description: 'Ultra-low latency inference engine for real-time grievance classification and citizen intelligence.',
+      status: 'Active',
+      color: '#3B82F6',
+      icon: Zap
+    },
+    {
+      title: 'Vector Intelligence',
+      description: 'FAISS-powered semantic search allows for high-accuracy retrieval-augmented generation (RAG).',
+      status: 'Stable',
+      color: '#6366F1',
+      icon: Database
+    },
+    {
+      title: 'Immutable Audit Ledger',
+      description: 'Every interaction and redressal is logged into an immutable decentralized record for integrity.',
+      status: 'Production',
+      color: '#0A2A66',
+      icon: Shield
+    },
+    {
+      title: 'Cloud Run V2',
+      description: 'Containerized microservices architecture ensuring 99.9% availability and global scaling capabilities.',
+      status: 'Live',
+      color: '#10B981',
+      icon: Server
+    },
+    {
+      title: 'FastAPI Micro-Framework',
+      description: 'High-performance asynchronous backend services optimized for heavy I/O and AI workloads.',
+      status: 'Active',
+      color: '#06B6D4',
+      icon: Zap
+    },
+    {
+      title: 'Reactive Frontend',
+      description: 'Next.js 14 based interface with server-side rendering for optimal speed and SEO performance.',
+      status: 'Latest',
+      color: '#F97316',
+      icon: Code2
+    }
+  ]
 
   return (
-    <div className="min-h-screen">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
-        style={{ background: 'rgba(0,8,40,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-[#F5F7FA]">
+      
+      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
+      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-5'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3b82f6, #22d3ee)' }}>
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black text-white tracking-wide">ARVIX LABS</span>
+             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+             </div>
+             <span className="font-display font-black text-[#0A2A66] text-2xl tracking-tighter">ARVIX LABS</span>
           </Link>
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/"            className="text-slate-400 hover:text-white transition-colors">Home</Link>
-            <Link href="/grievance"   className="text-slate-400 hover:text-white transition-colors">Grievance</Link>
-            <Link href="/technologies"className="text-white font-medium">Technologies</Link>
-            <Link href="/founders"    className="text-slate-400 hover:text-white transition-colors">About</Link>
+          <div className="hidden lg:flex items-center gap-10">
+            {['Home', 'Grievance', 'Technologies', 'Analytics', 'Founders'].map(l => (
+              <Link key={l} href={l === 'Home' ? '/' : `/${l.toLowerCase()}`} className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">
+                {l}
+              </Link>
+            ))}
           </div>
+          <Link href="/grievance" className="hidden lg:block gov-gradient-button px-6 py-2.5 text-sm">Submit Grievance</Link>
         </div>
       </nav>
 
-      <div className="pt-28 pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="pt-20 pb-32 px-6 overflow-hidden relative">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+        <div className="max-w-7xl mx-auto space-y-32 relative z-10">
 
           {/* Hero */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-blue-300 mb-6"
-              style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)' }}>
-              <Zap className="w-3.5 h-3.5" /> Built at Arvix Labs
-            </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-6">
-              Technology <span className="gradient-text">Showcase</span>
-            </h1>
-            <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
-              Innovations developed at Arvix Labs — from AI intelligence engines to civic platforms,
-              built for real-world government impact.
-            </p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-4xl mx-auto">
+             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-6">
+                <Layers className="w-3.5 h-3.5" /> Core Infrastructure
+             </span>
+             <h1 className="text-5xl md:text-7xl font-display font-black text-[#0A2A66] mb-8 tracking-tight leading-[1.1]">
+                Technological <span className="gradient-text">Excellence</span>
+             </h1>
+             <p className="text-slate-500 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto">
+                Arvix Labs utilizes a state-of-the-art stack to deliver government-grade reliability and security at internet speed.
+             </p>
           </motion.div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            {categories.map(cat => (
-              <button key={cat} onClick={() => setFilter(cat)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filter === cat ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                style={filter === cat
-                  ? { background: cat === 'All' ? 'rgba(59,130,246,0.25)' : `${CATEGORY_COLORS[cat] || '#3b82f6'}25`,
-                      border: `1px solid ${cat === 'All' ? 'rgba(59,130,246,0.4)' : `${CATEGORY_COLORS[cat] || '#3b82f6'}50`}`,
-                      color: cat === 'All' ? '#93c5fd' : CATEGORY_COLORS[cat] || '#93c5fd' }
-                  : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                {cat}
-              </button>
+          {/* Tech Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {technologies.map((tech, i) => (
+              <motion.div key={tech.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="gov-card group hover:shadow-2xl transition-all duration-500 border-slate-200">
+                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 group-hover:bg-blue-50 transition-colors" style={{ color: tech.color }}>
+                   <tech.icon className="w-7 h-7" />
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-2xl font-bold tracking-tight">{tech.title}</h3>
+                  <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-white border border-slate-100 text-slate-400 group-hover:text-blue-500 cursor-default transition-colors">
+                     {tech.status}
+                  </span>
+                </div>
+                <p className="text-slate-500 font-medium leading-relaxed mb-8">
+                  {tech.description}
+                </p>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-300 group-hover:text-primary transition-all">
+                   View Documentation <ArrowRight className="w-4 h-4" />
+                </div>
+              </motion.div>
             ))}
           </div>
 
-          {/* Grid */}
-          {loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1,2,3,4].map(i => <div key={i} className="glass-card p-6 h-60 shimmer rounded-2xl" />)}
-            </div>
-          ) : (
-            <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visible.map((tech, i) => {
-                const st = STATUS_CONFIG[tech.status] || STATUS_CONFIG.Prototype
-                const StatusIcon = st.icon
-                const catColor = CATEGORY_COLORS[tech.category] || '#3b82f6'
-                return (
-                  <motion.div key={tech.id} layout
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                    className="glass-card p-6 group"
-                    style={{ border: `1px solid ${catColor}15` }}>
-
-                    {/* Image / placeholder */}
-                    {tech.image_url ? (
-                      <img src={tech.image_url} alt={tech.title}
-                        className="w-full h-36 object-cover rounded-xl mb-5" />
-                    ) : (
-                      <div className="w-full h-36 rounded-xl mb-5 flex items-center justify-center text-4xl font-black"
-                        style={{ background: `linear-gradient(135deg, ${catColor}15, ${catColor}05)`, color: catColor, border: `1px solid ${catColor}20` }}>
-                        {tech.title.charAt(0)}
+          {/* Deep Stack Visualization */}
+          <div className="relative pt-16">
+             <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-3xl opacity-5 blur-3xl pointer-events-none" />
+             <div className="gov-card p-16 bg-white shadow-2xl overflow-hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                   <div className="space-y-8">
+                      <h2 className="text-4xl font-display font-black tracking-tight">The Arvix AI Framework (v1.0)</h2>
+                      <p className="text-slate-500 font-medium leading-relaxed">
+                         Our framework is designed for absolute data sovereignty. We process citizen data through local vector stores before querying frontier models, ensuring privacy-by-design.
+                      </p>
+                      <div className="space-y-6">
+                         {[
+                           { title: 'Zero-Trust Architecture', desc: 'Secure by default. Every request is verified.' },
+                           { title: 'Multimodal Processing', desc: 'Accepting voice, text, and visual evidence.' },
+                           { title: 'Distributed Intelligence', desc: 'Edge-optimized for remote rural access.' },
+                         ].map(item => (
+                           <div key={item.title} className="flex gap-4">
+                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mt-1 flex-shrink-0">
+                                 <CheckCircle className="w-4 h-4 text-blue-600" />
+                              </div>
+                              <div>
+                                 <p className="font-bold text-[#0A2A66]">{item.title}</p>
+                                 <p className="text-slate-400 text-sm">{item.desc}</p>
+                              </div>
+                           </div>
+                         ))}
                       </div>
-                    )}
-
-                    {/* Header row */}
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                        style={{ background: `${catColor}15`, color: catColor, border: `1px solid ${catColor}25` }}>
-                        {tech.category}
-                      </span>
-                      <span className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full"
-                        style={{ background: st.bg, color: st.color, border: `1px solid ${st.color}30` }}>
-                        <StatusIcon className="w-3 h-3" /> {tech.status}
-                      </span>
-                    </div>
-
-                    <h3 className="text-white font-bold text-xl mb-2">{tech.title}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-4">{tech.description}</p>
-
-                    {tech.use_case && (
-                      <div className="p-3 rounded-xl mb-4"
-                        style={{ background: `${catColor}06`, border: `1px solid ${catColor}15` }}>
-                        <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: catColor }}>Use Case</p>
-                        <p className="text-slate-400 text-xs leading-relaxed">{tech.use_case}</p>
+                   </div>
+                   <div className="relative h-[300px] bg-slate-50 rounded-2xl flex items-center justify-center p-8 overflow-hidden">
+                      <div className="absolute inset-0 bg-grid-pattern opacity-20" />
+                      <div className="relative z-10 w-full space-y-4">
+                         <div className="h-12 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center px-4 justify-between translate-x-4">
+                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Public Layer</span>
+                            <div className="flex gap-1">
+                               <div className="w-1.5 h-1.5 rounded-full bg-red-400" /><div className="w-1.5 h-1.5 rounded-full bg-yellow-400" /><div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                            </div>
+                         </div>
+                         <div className="h-16 bg-[#0A2A66] text-white rounded-lg shadow-2xl flex items-center px-6 justify-between transform -translate-x-4 scale-105 border border-white/10">
+                            <div className="flex items-center gap-3">
+                               <Cpu className="w-5 h-5 text-blue-400" />
+                               <span className="text-sm font-bold tracking-tight">AI Orchestration Core</span>
+                            </div>
+                            <div className="w-12 h-1.5 bg-blue-500/30 rounded-full overflow-hidden">
+                               <div className="w-2/3 h-full bg-blue-400 animate-[shimmer_2s_infinite]" />
+                            </div>
+                         </div>
+                         <div className="h-12 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center px-4 justify-between translate-x-2">
+                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Data Sovereignty Box</span>
+                            <Lock className="w-3.5 h-3.5 text-slate-300" />
+                         </div>
                       </div>
-                    )}
+                   </div>
+                </div>
+             </div>
+          </div>
 
-                    <div className="flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all"
-                      style={{ color: catColor }}>
-                      Learn More <ArrowRight className="w-4 h-4" />
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </motion.div>
-          )}
-
-          {/* CTA */}
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-            className="text-center mt-20 p-12 rounded-2xl"
-            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(34,211,238,0.05))', border: '1px solid rgba(59,130,246,0.15)' }}>
-            <h2 className="text-3xl font-black text-white mb-4">Interested in our technology?</h2>
-            <p className="text-slate-400 mb-8">Partner with Arvix Labs to bring AI-powered intelligence to your government operations.</p>
-            <Link href="/founders#contact" className="btn-glow text-white px-8 py-3.5 text-sm font-semibold inline-flex">
-              Get in Touch <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </motion.div>
         </div>
       </div>
+
+      <footer className="bg-white py-12 px-6 border-t mt-auto text-center font-display font-black uppercase tracking-[0.2em] text-[10px] text-slate-400">
+         © 2024 Arvix Labs — Technological Integrity Dashboard
+      </footer>
 
       <ChatBot />
     </div>

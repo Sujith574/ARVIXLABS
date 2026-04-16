@@ -7,6 +7,36 @@ from app.core.security import require_role
 from typing import List
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
+ 
+@router.get("/public-overview")
+async def get_public_overview(db: Session = Depends(get_db)):
+    """Publicly available analytics overview."""
+    total = db.query(Complaint).count()
+    resolved = db.query(Complaint).filter(Complaint.status == "resolved").count()
+    
+    # Mock distribution for variety if DB is sparse
+    if total < 10:
+        mock_total = 1248 + total
+        mock_resolved = 912 + resolved
+        return {
+            "total": mock_total,
+            "resolved": mock_resolved,
+            "pending": 156,
+            "in_progress": 180,
+            "critical": 24,
+            "resolution_rate": round((mock_resolved / mock_total * 100), 1),
+            "is_mock": True
+        }
+
+    return {
+        "total": total,
+        "resolved": resolved,
+        "pending": db.query(Complaint).filter(Complaint.status == "submitted").count(),
+        "in_progress": db.query(Complaint).filter(Complaint.status == "in_progress").count(),
+        "critical": db.query(Complaint).filter(Complaint.priority == "critical").count(),
+        "resolution_rate": round((resolved / total * 100) if total > 0 else 0, 1),
+        "is_mock": False
+    }
 
 @router.get("/overview")
 async def get_overview(

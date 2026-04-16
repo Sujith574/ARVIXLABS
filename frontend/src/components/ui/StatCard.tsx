@@ -32,8 +32,20 @@ export default function StatCard({ title, value, icon: Icon, trend, trendLabel, 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4, ease: 'easeOut' }}
-      className="stat-card glass-card-hover"
+      whileHover={{ 
+        rotateX: 5, 
+        rotateY: 10, 
+        scale: 1.05,
+        translateZ: 20
+      }}
+      transition={{ 
+        delay, 
+        duration: 0.4, 
+        ease: 'easeOut',
+        type: 'spring',
+        stiffness: 300
+      }}
+      className="stat-card glass-card-hover preserve-3d cursor-default"
     >
       <div className="flex items-start justify-between">
         <div>

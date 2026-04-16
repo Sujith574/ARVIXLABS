@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - build 
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/arvix-frontend'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=$_NEXT_PUBLIC_API_URL'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/arvix-frontend']
+
+images:
+  - 'gcr.io/$PROJECT_ID/arvix-frontend'

@@ -19,7 +19,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    complaints = relationship("Complaint", back_populates="user")
+    complaints = relationship("Complaint", foreign_keys="[Complaint.user_id]", back_populates="user")
+    assigned_complaints = relationship("Complaint", foreign_keys="[Complaint.assigned_to]")
 
 
 class Department(Base):

@@ -75,12 +75,17 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 perspective-1000">
         {STAT_CARDS.map((s, i) => {
           const Icon = s.icon
           return (
-            <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }} className="stat-card">
+            <motion.div key={i} 
+              initial={{ opacity: 0, y: 16 }} 
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ rotateY: 10, rotateX: 5, translateZ: 10, scale: 1.02 }}
+              transition={{ delay: i * 0.08, type: 'spring', stiffness: 300 }} 
+              className="stat-card preserve-3d cursor-default"
+            >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-slate-500 uppercase tracking-widest">{s.label}</p>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -99,19 +104,21 @@ export default function AdminDashboardPage() {
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Quick Actions */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="lg:col-span-3 glass-card p-6">
+          className="lg:col-span-3 glass-card p-6 perspective-1000">
           <h2 className="text-white font-bold mb-5">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {QUICK_ACTIONS.map((a, i) => {
               const Icon = a.icon
               return (
                 <Link key={i} href={a.href}
-                  className="flex flex-col items-center gap-3 p-4 rounded-xl transition-all hover:scale-105"
+                  className="flex flex-col items-center gap-3 p-4 rounded-xl transition-all hover:scale-105 active:scale-95 group preserve-3d"
                   style={{ background: `${a.color}0a`, border: `1px solid ${a.color}25` }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ background: `${a.color}18`, border: `1px solid ${a.color}35` }}>
+                  <motion.div 
+                    whileHover={{ scale: 1.1, rotateZ: 5 }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-white/5 group-hover:bg-white/10"
+                    style={{ border: `1px solid ${a.color}35` }}>
                     <Icon className="w-5 h-5" style={{ color: a.color }} />
-                  </div>
+                  </motion.div>
                   <span className="text-xs font-medium text-white text-center">{a.label}</span>
                 </Link>
               )
@@ -125,11 +132,11 @@ export default function AdminDashboardPage() {
           <h2 className="text-white font-bold mb-5">Recent Activity</h2>
           <div className="space-y-4">
             {RECENT_ACTIVITY.map((a, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+              <div key={i} className="flex items-start gap-3 group">
+                <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 group-hover:scale-150 transition-transform"
                   style={{ background: typeColors[a.type] || '#64748b' }} />
                 <div>
-                  <p className="text-sm text-white">{a.label}</p>
+                  <p className="text-sm text-white group-hover:text-blue-400 transition-colors">{a.label}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{a.time}</p>
                 </div>
               </div>

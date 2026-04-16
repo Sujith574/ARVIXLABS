@@ -54,7 +54,7 @@ export default function DashboardPage() {
 
       <div className="px-6 py-6 space-y-8">
         {/* Stats row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 perspective-1000">
           <StatCard title="Total Complaints" value={stats.total_complaints.toLocaleString()} icon={FileText} color="blue" trend={12} delay={0} />
           <StatCard title="Resolved"         value={stats.resolved.toLocaleString()}          icon={CheckCircle} color="green" trend={8} delay={0.1} />
           <StatCard title="Pending Review"   value={stats.pending.toLocaleString()}            icon={Clock}   color="orange" trend={-3} delay={0.2} />

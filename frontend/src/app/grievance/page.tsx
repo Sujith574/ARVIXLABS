@@ -1,27 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { Shield, FileText, Search, CheckCircle, AlertCircle, Loader2, Upload, ArrowRight, ChevronRight, Clock, Zap } from 'lucide-react'
+import { 
+  Shield, 
+  FileText, 
+  Search, 
+  CheckCircle, 
+  AlertCircle, 
+  Loader2, 
+  ArrowRight, 
+  Clock, 
+  Zap, 
+  Menu, 
+  X,
+  Lock,
+  Mail,
+  User,
+  ExternalLink
+} from 'lucide-react'
 import axios from 'axios'
-import ChatBot from '@/components/ui/ChatBot'
+import dynamic from 'next/dynamic'
+import Navbar from '@/components/layout/Navbar'
+
+const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const STATUS_STYLE: Record<string, any> = {
-  submitted:   { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  label: 'Submitted',   icon: Clock },
-  'in-review': { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', label: 'In Review',   icon: Zap },
-  resolved:    { color: '#10b981', bg: 'rgba(16,185,129,0.12)', label: 'Resolved',    icon: CheckCircle },
-  rejected:    { color: '#ef4444', bg: 'rgba(239,68,68,0.12)',  label: 'Rejected',    icon: AlertCircle },
+  submitted:   { color: '#3B82F6', bg: '#EFF6FF', border: '#DBEAFE', label: 'Submitted',   icon: Clock },
+  'in-review': { color: '#F59E0B', bg: '#FFFBEB', border: '#FEF3C7', label: 'In Review',   icon: Zap },
+  resolved:    { color: '#10B981', bg: '#ECFDF5', border: '#D1FAE5', label: 'Resolved',    icon: CheckCircle },
+  rejected:    { color: '#EF4444', bg: '#FEF2F2', border: '#FEE2E2', label: 'Rejected',    icon: AlertCircle },
 }
 
-const PRIORITY_COLOR: Record<string, string> = {
-  low: '#10b981', medium: '#f59e0b', high: '#f97316', critical: '#ef4444'
+const PRIORITY_STYLE: Record<string, any> = {
+  low:      { color: '#10B981', bg: '#ECFDF5' },
+  medium:   { color: '#F59E0B', bg: '#FFFBEB' },
+  high:     { color: '#F97316', bg: '#FFF7ED' },
+  critical: { color: '#EF4444', bg: '#FEF2F2' },
 }
 
 export default function GrievancePage() {
   const [tab, setTab] = useState<'submit'|'track'>('submit')
+  const [mobileMenu, setMobileMenu] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   // Submit form
   const [form, setForm]   = useState({ title: '', description: '', submitter_name: '', submitter_email: '' })
@@ -35,6 +59,12 @@ export default function GrievancePage() {
   const [trackResult, setTrackResult] = useState<any>(null)
   const [trackErr, setTrackErr]       = useState('')
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title || !form.description) return
@@ -43,8 +73,9 @@ export default function GrievancePage() {
     try {
       const res = await axios.post(`${API}/api/v1/grievances/submit`, form)
       setSubmitted(res.data)
-    } catch {
-      setSubmitErr('Failed to submit. Please try again.')
+    } catch (err: any) {
+      console.error("Submission error:", err)
+      setSubmitErr(err.response?.data?.detail || 'Portal connection failure. Please verify your internet and try again.')
     } finally { setSubmitting(false) }
   }
 
@@ -58,205 +89,247 @@ export default function GrievancePage() {
       const res = await axios.get(`${API}/api/v1/grievances/track/${ticketInput.trim().toUpperCase()}`)
       setTrackResult(res.data)
     } catch {
-      setTrackErr('Ticket not found. Please check your ticket ID.')
+      setTrackErr('Ticket ID not found. Please double-check your reference code.')
     } finally { setTracking(false) }
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
-        style={{ background: 'rgba(0,8,40,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3b82f6, #22d3ee)' }}>
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black text-white tracking-wide">ARVIX LABS</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">Home</Link>
-            <Link href="/technologies" className="text-sm text-slate-400 hover:text-white transition-colors">Technologies</Link>
-            <Link href="/founders" className="text-sm text-slate-400 hover:text-white transition-colors">About</Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      
+      <Navbar />
 
-      {/* Hero */}
-      <div className="pt-28 pb-8 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* ── Sub-Header ─────────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-slate-100 py-24 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-50 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="max-w-5xl mx-auto text-center relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-blue-300 mb-6"
-              style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)' }}>
-              <FileText className="w-3.5 h-3.5" /> Grievance Intelligence Platform
-            </div>
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
-              Submit & Track <span className="gradient-text">Your Grievance</span>
+            <h1 className="text-5xl md:text-7xl font-display font-black text-[#0A2A66] mb-8 tracking-tighter">
+              Administrative <span className="gradient-text">Grievance Portal</span>
             </h1>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              AI automatically classifies, prioritizes, and routes your complaint to the right department.
+            <p className="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl mx-auto mb-16">
+              Our high-fidelity framework ensures citizen concerns are classified and prioritized via internal AI nodes for rapid institutional resolution.
             </p>
           </motion.div>
 
-          {/* Tab Switcher */}
-          <div className="flex gap-3 justify-center mt-8 mb-10">
+          <div className="inline-flex p-1.5 bg-slate-100/80 backdrop-blur rounded-[2rem] border border-slate-200/50 perspective-1000">
             {[
-              { id: 'submit', label: 'Submit Grievance', icon: FileText },
-              { id: 'track',  label: 'Track Status',    icon: Search },
-            ].map(t => {
-              const Icon = t.icon
-              return (
-                <button key={t.id} onClick={() => setTab(t.id as any)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${tab === t.id ? 'text-white' : 'text-slate-400 hover:text-white'}`}
-                  style={tab === t.id
-                    ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(34,211,238,0.15))', border: '1px solid rgba(59,130,246,0.4)' }
-                    : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <Icon className="w-4 h-4" /> {t.label}
-                </button>
-              )
-            })}
+              { id: 'submit', label: 'Log New Protocol', icon: FileText },
+              { id: 'track',  label: 'Audit Status',    icon: Search },
+            ].map(t => (
+              <motion.button key={t.id} 
+                onClick={() => setTab(t.id as any)}
+                whileHover={{ scale: 1.05, translateZ: 10 }}
+                whileTap={{ scale: 0.95 }}
+                className={`flex items-center gap-3 px-10 py-4 rounded-[1.5rem] text-sm font-black uppercase tracking-widest transition-all preserve-3d ${tab === t.id ? 'bg-white text-[#0A2A66] shadow-xl shadow-blue-900/5' : 'text-slate-500 hover:text-[#0A2A66]'}`}>
+                <t.icon className="w-4 h-4" /> {t.label}
+              </motion.button>
+            ))}
           </div>
         </div>
+      </div>
 
-        <div className="max-w-2xl mx-auto">
-          <AnimatePresence mode="wait">
+      {/* ── Main Content Area ──────────────────────────────────────────────── */}
+      <div className="py-24 px-6 max-w-5xl mx-auto">
+        <AnimatePresence mode="wait">
 
-            {/* ── Submit Form ──────────────────────────────────────────────────── */}
-            {tab === 'submit' && !submitted && (
-              <motion.div key="submit" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                <div className="glass-card p-8" style={{ border: '1px solid rgba(59,130,246,0.2)' }}>
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Your Name</label>
-                        <input className="input-glass" placeholder="Optional"
-                          value={form.submitter_name} onChange={e => setForm({...form, submitter_name: e.target.value})} />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Email</label>
-                        <input type="email" className="input-glass" placeholder="Optional"
-                          value={form.submitter_email} onChange={e => setForm({...form, submitter_email: e.target.value})} />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Grievance Title *</label>
-                      <input required className="input-glass" placeholder="Brief description of the issue"
-                        value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">Detailed Description *</label>
-                      <textarea required rows={5} className="input-glass resize-none"
-                        placeholder="Provide full details — location, dates, impact, what resolution you expect…"
-                        value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
-                    </div>
-                    {submitErr && (
-                      <p className="text-red-400 text-sm flex items-center gap-2"><AlertCircle className="w-4 h-4" />{submitErr}</p>
-                    )}
-                    <button type="submit" disabled={submitting || !form.title || !form.description}
-                      className="w-full btn-glow text-white justify-center py-3.5 text-sm font-semibold disabled:opacity-50">
-                      {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting & Classifying…</> : <><ArrowRight className="w-4 h-4" /> Submit Grievance</>}
-                    </button>
-                    <p className="text-center text-xs text-slate-600">Powered by Gemini AI — auto-classification & priority detection</p>
-                  </form>
+          {/* ── Submit Form ── */}
+          {tab === 'submit' && !submitted && (
+            <motion.div key="submit" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
+              <div className="gov-card !p-0 overflow-hidden border-slate-200/50">
+                <div className="p-12 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                   <div>
+                      <h2 className="text-3xl font-bold text-[#0A2A66] tracking-tight">Submission Data</h2>
+                      <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Institutional Audit Trail Ready</p>
+                   </div>
+                   <div className="flex items-center gap-3 px-5 py-2.5 bg-white rounded-2xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-blue-600">
+                      <Lock className="w-3.5 h-3.5" /> End-to-End Encryption Enabled
+                   </div>
                 </div>
-              </motion.div>
-            )}
 
-            {/* ── Submitted Success ─────────────────────────────────────────── */}
-            {tab === 'submit' && submitted && (
-              <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                className="glass-card p-10 text-center" style={{ border: '1px solid rgba(16,185,129,0.3)' }}>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
-                  style={{ background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.4)' }}>
-                  <CheckCircle className="w-8 h-8 text-green-400" />
-                </div>
-                <h2 className="text-2xl font-black text-white mb-2">Grievance Submitted!</h2>
-                <p className="text-slate-400 mb-6">Your ticket ID — save this to track your complaint</p>
-                <div className="text-3xl font-black gradient-text mb-6">{submitted.ticket_id}</div>
-                <div className="grid grid-cols-3 gap-4 mb-8 text-center">
-                  <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p className="text-xs text-slate-500 mb-1">AI Category</p>
-                    <p className="text-white font-semibold text-sm">{submitted.ai_category}</p>
+                <form onSubmit={handleSubmit} className="p-12 space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 ml-2">
+                        <User className="w-3.5 h-3.5" /> Submitter Name
+                      </label>
+                      <input className="gov-input" placeholder="Rahul Sharma"
+                        value={form.submitter_name} onChange={e => setForm({...form, submitter_name: e.target.value})} />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 ml-2">
+                        <Mail className="w-3.5 h-3.5" /> Official Email
+                      </label>
+                      <input type="email" className="gov-input" placeholder="sharma.r@gov.in"
+                        value={form.submitter_email} onChange={e => setForm({...form, submitter_email: e.target.value})} />
+                    </div>
                   </div>
-                  <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p className="text-xs text-slate-500 mb-1">Priority</p>
-                    <p className="font-semibold text-sm capitalize" style={{ color: PRIORITY_COLOR[submitted.ai_priority] || '#3b82f6' }}>
-                      {submitted.ai_priority}
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 ml-2">
+                      Grievance Subject *
+                    </label>
+                    <input required className="gov-input !text-xl !font-bold" placeholder="High-level subject of the concern..."
+                      value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 ml-2">
+                      Full Technical Description & Evidence *
+                    </label>
+                    <textarea required rows={10} className="gov-input resize-none"
+                      placeholder="Please provide specific details, including locations, department names, and previous interaction IDs if applicable..."
+                      value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+                  </div>
+
+                  {submitErr && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                      className="p-6 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-4 text-red-700 text-sm font-bold">
+                       <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                          <AlertCircle className="w-6 h-6" />
+                       </div>
+                       <span>{submitErr}</span>
+                    </motion.div>
+                  )}
+
+                  <div className="pt-6">
+                    <button type="submit" disabled={submitting || !form.title || !form.description}
+                      className="w-full gov-gradient-button py-6 text-xl shadow-2xl shadow-blue-600/20">
+                      {submitting ? <><Loader2 className="w-6 h-6 animate-spin" /> Verifying Records...</> : <><CheckCircle className="w-6 h-6" /> Dispatch Official Grievance</>}
+                    </button>
+                    <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-8">
+                      Authorized by Arvix Digital Security Framework v2.1
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p className="text-xs text-slate-500 mb-1">Routed To</p>
-                    <p className="text-white font-semibold text-sm">{submitted.ai_department}</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={() => { setTab('track'); setTicketInput(submitted.ticket_id) }}
-                    className="flex-1 btn-outline-glow py-2.5 justify-center">Track Status</button>
-                  <button onClick={() => { setSubmitted(null); setForm({ title:'', description:'', submitter_name:'', submitter_email:'' }) }}
-                    className="flex-1 btn-glow text-white py-2.5 justify-center">Submit Another</button>
-                </div>
-              </motion.div>
-            )}
+                </form>
+              </div>
+            </motion.div>
+          )}
 
-            {/* ── Track ────────────────────────────────────────────────────── */}
-            {tab === 'track' && (
-              <motion.div key="track" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
-                <div className="glass-card p-6" style={{ border: '1px solid rgba(59,130,246,0.2)' }}>
-                  <form onSubmit={handleTrack} className="flex gap-3">
-                    <input className="input-glass flex-1" placeholder="Enter Ticket ID — e.g. ALX-123456"
-                      value={ticketInput} onChange={e => setTicketInput(e.target.value)} />
-                    <button type="submit" disabled={tracking || !ticketInput}
-                      className="btn-glow text-white px-6 whitespace-nowrap disabled:opacity-50">
-                      {tracking ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Search className="w-4 h-4" /> Track</>}
-                    </button>
-                  </form>
-                  {trackErr && <p className="text-red-400 text-sm mt-3 flex items-center gap-2"><AlertCircle className="w-4 h-4" />{trackErr}</p>}
-                </div>
+          {/* ── Success Block ── */}
+          {tab === 'submit' && submitted && (
+            <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              className="gov-card p-20 text-center border-blue-100/50 shadow-2xl shadow-blue-600/10">
+              <div className="w-28 h-28 rounded-[2rem] flex items-center justify-center mx-auto mb-12 bg-blue-50 text-blue-600 shadow-xl shadow-blue-500/10 active:scale-95 transition-transform">
+                <CheckCircle className="w-14 h-14" />
+              </div>
+              <h2 className="text-5xl font-display font-black text-[#0A2A66] mb-4">Submission Verified</h2>
+              <p className="text-slate-500 font-medium text-xl mb-16">The concern has been indexed in the state registry and routed to AI triage.</p>
+              
+              <div className="bg-slate-50 rounded-[2.5rem] p-12 mb-16 border border-slate-100 relative group overflow-hidden">
+                 <div className="absolute top-6 right-8 text-[10px] font-black uppercase text-blue-600 bg-white px-4 py-2 rounded-xl border border-blue-100 shadow-sm">Official Protocol Reference</div>
+                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Unique Ticket ID</p>
+                 <p className="text-6xl md:text-7xl font-display font-black text-[#0A2A66] tracking-tighter leading-none">{submitted.ticket_id}</p>
+                 <div className="mt-12 flex flex-wrap justify-center gap-8">
+                    <div className="flex items-center gap-3 text-sm font-bold text-slate-600 px-6 py-2.5 bg-white rounded-2xl border border-slate-100">
+                       <Zap className="w-5 h-5 text-amber-500 fill-current" /> Priority: <span className="capitalize" style={{ color: PRIORITY_STYLE[submitted.ai_priority]?.color }}>{submitted.ai_priority}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm font-bold text-slate-600 px-6 py-2.5 bg-white rounded-2xl border border-slate-100">
+                       <Shield className="w-5 h-5 text-blue-600" /> Category: {submitted.ai_category || 'Triage Pending'}
+                    </div>
+                 </div>
+              </div>
 
-                {trackResult && (() => {
-                  const s = STATUS_STYLE[trackResult.status] || STATUS_STYLE.submitted
-                  const StatusIcon = s.icon
-                  return (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                      className="glass-card p-6" style={{ border: `1px solid ${s.color}30` }}>
-                      <div className="flex items-start justify-between mb-5">
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Ticket ID</p>
-                          <p className="text-xl font-black gradient-text">{trackResult.ticket_id}</p>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold"
-                          style={{ background: s.bg, color: s.color, border: `1px solid ${s.color}40` }}>
-                          <StatusIcon className="w-4 h-4" /> {s.label}
-                        </div>
-                      </div>
-                      <h3 className="text-white font-bold mb-2">{trackResult.title}</h3>
-                      <p className="text-slate-400 text-sm mb-5">{trackResult.description}</p>
-                      <div className="grid grid-cols-3 gap-3 text-xs">
-                        {[
-                          { label:'AI Category', value: trackResult.ai_category },
-                          { label:'Priority',    value: trackResult.ai_priority, color: PRIORITY_COLOR[trackResult.ai_priority] },
-                          { label:'Department',  value: trackResult.ai_department },
-                        ].map(f => (
-                          <div key={f.label} className="p-3 rounded-xl text-center" style={{ background:'rgba(255,255,255,0.03)' }}>
-                            <p className="text-slate-500 mb-1">{f.label}</p>
-                            <p className="text-white font-semibold capitalize" style={f.color ? {color: f.color} : {}}>{f.value}</p>
+              <div className="flex flex-col sm:flex-row gap-6">
+                <button onClick={() => { setTab('track'); setTicketInput(submitted.ticket_id) }}
+                  className="flex-1 gov-button-outline py-6 text-lg">Track Institutional Resolution</button>
+                <button onClick={() => { setSubmitted(null); setForm({ title:'', description:'', submitter_name:'', submitter_email:'' }) }}
+                  className="flex-1 gov-gradient-button py-6 text-lg">New Grid Submission</button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── Track Block ── */}
+          {tab === 'track' && (
+            <motion.div key="track" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-12">
+              <div className="gov-card p-12 bg-white border-slate-200/50">
+                <h3 className="font-bold text-[#0A2A66] text-2xl mb-10 tracking-tight">System Registry Search</h3>
+                <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-6">
+                  <input className="gov-input flex-1 !text-2xl !font-bold !py-6" placeholder="Reference ID (e.g. ALX-123456)"
+                    value={ticketInput} onChange={e => setTicketInput(e.target.value)} />
+                  <button type="submit" disabled={tracking || !ticketInput}
+                    className="gov-gradient-button px-12 whitespace-nowrap shadow-2xl shadow-blue-600/10 active:scale-95">
+                    {tracking ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Search className="w-6 h-6" /> Locate Record</>}
+                  </button>
+                </form>
+                {trackErr && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} 
+                    className="mt-8 p-6 bg-red-50 text-red-700 text-sm font-bold rounded-2xl border border-red-100 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                       <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <span>{trackErr}</span>
+                  </motion.div>
+                )}
+              </div>
+
+              {trackResult && (() => {
+                const s = STATUS_STYLE[trackResult.status] || STATUS_STYLE.submitted
+                const StatusIcon = s.icon
+                return (
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                    className="gov-card !p-0 overflow-hidden border-blue-100/50 shadow-2xl shadow-blue-900/10">
+                    <div className="bg-[#0A2A66] p-12 text-white flex flex-col sm:flex-row justify-between items-center gap-10">
+                       <div>
+                          <p className="text-[11px] font-black text-blue-300 uppercase tracking-[0.3em] mb-3">Authenticated System Record</p>
+                          <p className="text-5xl md:text-6xl font-display font-black tracking-tighter">{trackResult.ticket_id}</p>
+                       </div>
+                       <div className="flex items-center gap-4 px-8 py-4 rounded-[1.5rem] bg-white text-[#0A2A66] font-black text-sm uppercase tracking-widest shadow-2xl">
+                          <StatusIcon className="w-6 h-6" /> {s.label}
+                       </div>
+                    </div>
+
+                    <div className="p-12 space-y-12">
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pb-12 border-b border-slate-100">
+                          <div className="space-y-3">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calculated Priority</p>
+                             <div className="flex items-center gap-3 font-bold capitalize text-xl" style={{ color: PRIORITY_STYLE[trackResult.ai_priority]?.color }}>
+                                <Zap className="w-5 h-5 fill-current" /> {trackResult.ai_priority}
+                             </div>
                           </div>
-                        ))}
-                      </div>
-                      {trackResult.ai_summary && (
-                        <div className="mt-4 p-3 rounded-xl text-sm text-slate-400 italic"
-                          style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                          <span className="text-blue-400 font-medium not-italic">AI Summary: </span>{trackResult.ai_summary}
-                        </div>
-                      )}
-                    </motion.div>
-                  )
-                })()}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                          <div className="space-y-3">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">AI Categorization</p>
+                             <div className="flex items-center gap-3 font-bold text-[#0A2A66] text-xl">
+                                <Shield className="w-5 h-5 shadow-sm" /> {trackResult.ai_category || 'Detecting...'}
+                             </div>
+                          </div>
+                          <div className="space-y-3">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estimated Resolution</p>
+                             <div className="flex items-center gap-3 font-bold text-slate-700 text-xl">
+                                <Clock className="w-5 h-5 text-blue-500" /> 24-48 Hours
+                             </div>
+                          </div>
+                       </div>
+
+                       <div className="space-y-6">
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permanent Registry Data</h4>
+                          <h5 className="text-3xl font-bold text-[#0A2A66] tracking-tight">{trackResult.title}</h5>
+                          <p className="text-slate-500 font-medium leading-relaxed bg-slate-50 p-10 rounded-[2rem] border border-slate-100 italic">
+                             "{trackResult.description}"
+                          </p>
+                       </div>
+
+                       <div className="pt-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                          <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-slate-400">
+                             <Lock className="w-4 h-4" /> Immutable Administrative Entry
+                          </div>
+                          <button className="gov-button-outline px-8 py-4 text-xs tracking-widest">
+                             Download Verification Receipt <ExternalLink className="w-5 h-5" />
+                          </button>
+                       </div>
+                    </div>
+                  </motion.div>
+                )
+              })()}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      <footer className="bg-white py-16 px-6 border-t border-slate-100 mt-auto text-center">
+         <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em]">© 2024 Arvix Labs — Authorized Institutional Portal Infrastructure</p>
+      </footer>
 
       <ChatBot />
     </div>

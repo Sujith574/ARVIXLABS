@@ -3,105 +3,66 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Shield, Users, Code2, Star, ExternalLink } from 'lucide-react'
-import ChatBot from '@/components/ui/ChatBot'
+import { Shield, Users, Code2, Star, Send, CheckCircle, Loader2, AlertCircle, ExternalLink, Menu, X, Mail, Globe } from 'lucide-react'
 import axios from 'axios'
+import dynamic from 'next/dynamic'
+
+const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-const mockTeam = {
-  founders: [
-    {
-      id: '1', name: 'Sujit Kumar', role: 'Founder & CEO',
-      bio: 'Visionary technologist and AI researcher driving the future of government transparency through intelligent data systems.',
-      type: 'founder', linkedin: '#', github: '#', twitter: '#',
-    },
-  ],
-  developers: [
-    {
-      id: '2', name: 'Lead Engineer', role: 'Full-Stack AI Engineer',
-      bio: 'Architect of the RAG pipeline and vector search infrastructure powering the intelligence engine.',
-      type: 'developer', linkedin: '#', github: '#', twitter: '#',
-    },
-    {
-      id: '3', name: 'Frontend Dev', role: 'UI/UX Engineer',
-      bio: 'Crafting the premium government-tech interface with Three.js and Framer Motion.',
-      type: 'developer', linkedin: '#', github: '#',
-    },
-    {
-      id: '4', name: 'Backend Dev', role: 'FastAPI Specialist',
-      bio: 'Building scalable microservices, async APIs, and PostgreSQL-backed data pipelines.',
-      type: 'developer', linkedin: '#', github: '#',
-    },
-  ],
+const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
+  founder:   { label: '★ Leadership',  color: '#0A2A66' },
+  developer: { label: '⚡ Engineering', color: '#3B82F6' },
+  advisor:   { label: '◈ Advisory',   color: '#6B46C1' },
 }
 
-function PersonCard({ person, isFounder }: { person: any; isFounder: boolean }) {
+function PersonCard({ person }: { person: any }) {
+  const cfg = TYPE_CONFIG[person.type] || TYPE_CONFIG.developer
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.4 }}
-      className="glass-card p-6 group cursor-default"
-      style={{ border: isFounder ? '1px solid rgba(245,158,11,0.2)' : '1px solid rgba(59,130,246,0.15)' }}
-    >
-      {/* Avatar */}
-      <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-black"
-        style={
-          person.image_url
-            ? { backgroundImage: `url(${person.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-            : {
-                background: isFounder
-                  ? 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.1))'
-                  : 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(6,182,212,0.1))',
-                border: isFounder ? '2px solid rgba(245,158,11,0.3)' : '2px solid rgba(59,130,246,0.3)',
-                color: isFounder ? '#f59e0b' : '#3b82f6',
-              }}>
-        {!person.image_url && person.name.charAt(0)}
+    <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      className="gov-card p-10 bg-white flex flex-col items-center text-center">
+
+      <div className="w-24 h-24 rounded-full mb-6 border-2 border-slate-100 p-1">
+        {person.image_url ? (
+          <img src={person.image_url} alt={person.name}
+            className="w-full h-full rounded-full object-cover" />
+        ) : (
+          <div className="w-full h-full rounded-full flex items-center justify-center text-3xl font-black bg-slate-50 text-[#0A2A66]">
+            {person.name.charAt(0)}
+          </div>
+        )}
       </div>
 
-      {/* Badge */}
-      <div className="flex justify-center mb-3">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold"
-          style={{
-            background: isFounder ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
-            color: isFounder ? '#f59e0b' : '#3b82f6',
-            border: isFounder ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(59,130,246,0.25)',
-          }}>
-          {isFounder ? '★ Founder' : '⚡ Developer'}
+      <div className="mb-4">
+        <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-slate-100 bg-slate-50 text-slate-500">
+          {cfg.label}
         </span>
       </div>
 
-      <div className="text-center mb-4">
-        <h3 className="text-white font-bold text-lg mb-1">{person.name}</h3>
-        <p className="text-xs font-medium" style={{ color: isFounder ? '#f59e0b' : '#3b82f6' }}>{person.role}</p>
-      </div>
+      <h3 className="text-xl font-bold text-[#0A2A66] mb-1">{person.name}</h3>
+      <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">{person.role}</p>
+      <p className="text-slate-500 text-sm leading-relaxed mb-8">{person.bio}</p>
 
-      <p className="text-slate-400 text-sm text-center leading-relaxed mb-5">{person.bio}</p>
-
-      {/* Social links — plain text since lucide social icons aren't available */}
-      <div className="flex justify-center gap-3">
+      <div className="mt-auto pt-6 border-t w-full flex justify-center gap-4">
         {person.linkedin && (
-          <a href={person.linkedin} target="_blank" rel="noopener"
-            className="text-xs px-2 py-1 rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-            LinkedIn <ExternalLink className="w-3 h-3 inline-block ml-1" />
+          <a href={person.linkedin} target="_blank" rel="noopener" className="text-slate-400 hover:text-blue-700 transition-colors">
+            <ExternalLink className="w-5 h-5" />
           </a>
         )}
         {person.github && (
-          <a href={person.github} target="_blank" rel="noopener"
-            className="text-xs px-2 py-1 rounded-lg text-slate-400 hover:text-white transition-colors"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-            GitHub <ExternalLink className="w-3 h-3 inline-block ml-1" />
+          <a href={person.github} target="_blank" rel="noopener" className="text-slate-400 hover:text-black transition-colors">
+            <Globe className="w-5 h-5" />
           </a>
         )}
         {person.twitter && (
-          <a href={person.twitter} target="_blank" rel="noopener"
-            className="text-xs px-2 py-1 rounded-lg text-slate-400 hover:text-cyan-400 transition-colors"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-            X.com <ExternalLink className="w-3 h-3 inline-block ml-1" />
+          <a href={person.twitter} target="_blank" rel="noopener" className="text-slate-400 hover:text-blue-400 transition-colors">
+            <ExternalLink className="w-5 h-5" />
+          </a>
+        )}
+        {person.email && (
+          <a href={`mailto:${person.email}`} className="text-slate-400 hover:text-red-500 transition-colors">
+            <Mail className="w-5 h-5" />
           </a>
         )}
       </div>
@@ -110,103 +71,125 @@ function PersonCard({ person, isFounder }: { person: any; isFounder: boolean }) 
 }
 
 export default function AboutPage() {
-  const [team, setTeam] = useState(mockTeam)
+  const [team, setTeam] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [mobileMenu, setMobileMenu] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      axios.get(`${API}/api/v1/founders/founders`).catch(() => ({ data: [] })),
-      axios.get(`${API}/api/v1/founders/developers`).catch(() => ({ data: [] })),
-    ]).then(([f, d]) => {
-      if (f.data.length || d.data.length) {
-        setTeam({ founders: f.data.length ? f.data : mockTeam.founders, developers: d.data.length ? d.data : mockTeam.developers })
-      }
-    })
+    axios.get(`${API}/api/v1/founders/`)
+      .then(r => setTeam(r.data))
+      .catch(() => setTeam([]))
+      .finally(() => setLoading(false))
   }, [])
 
+  const founders   = team.filter(p => p.type === 'founder')
+  const developers = team.filter(p => p.type === 'developer')
+  const advisors   = team.filter(p => p.type === 'advisor')
+
   return (
-    <div className="min-h-screen">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
-        style={{ background: 'rgba(0,8,40,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3b82f6, #22d3ee)' }}>
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black text-white tracking-wide">ARVIX LABS</span>
-          </Link>
-          <div className="flex items-center gap-6 text-sm text-slate-400">
-            <Link href="/#solutions" className="hover:text-white transition-colors">Solutions</Link>
-            <Link href="/#ai-demo" className="hover:text-white transition-colors">AI Insights</Link>
-            <Link href="/about" className="text-white">About</Link>
-          </div>
+    <div className="min-h-screen bg-white">
+      
+      {/* ── Top Header Strip ──────────────────────────────────────────────── */}
+      <div className="gov-strip hidden md:flex justify-between items-center">
+        <div className="flex items-center gap-2">
+           <span className="w-2 h-2 rounded-full bg-blue-600" />
+           <span>Arvix Labs — Official Administration Portal</span>
         </div>
+        <div className="flex items-center gap-4">
+           <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+           <a href="#" className="hover:text-primary transition-colors">Documentation</a>
+        </div>
+      </div>
+
+      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary">
+              <Shield className="w-6 h-6 text-white" />
+            </div>
+            <span className="font-extrabold text-[#0A2A66] tracking-tight text-xl uppercase">ARVIX LABS</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-sm text-slate-600 hover:text-primary transition-colors font-semibold">Home</Link>
+            <Link href="/grievance" className="text-sm text-slate-600 hover:text-primary transition-colors font-semibold">Grievance Portal</Link>
+            <Link href="/technologies" className="text-sm text-slate-600 hover:text-primary transition-colors font-semibold">Technologies</Link>
+          </div>
+
+          <button className="md:hidden p-2 text-slate-600" onClick={() => setMobileMenu(v => !v)}>
+            {mobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+        
+        {mobileMenu && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+            className="md:hidden bg-white px-6 pb-6 space-y-4 border-b">
+            <Link href="/" className="block text-sm font-semibold text-slate-600 py-2 border-b">Home</Link>
+            <Link href="/grievance" className="block text-sm font-semibold text-slate-600 py-2 border-b">Grievance Portal</Link>
+            <Link href="/technologies" className="block text-sm font-semibold text-slate-600 py-2">Technologies</Link>
+          </motion.div>
+        )}
       </nav>
 
-      <div className="pt-28 pb-20 px-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="pt-20 pb-24 px-6">
+        <div className="max-w-7xl mx-auto space-y-32">
 
-          {/* Hero */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-blue-300 mb-6"
-              style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)' }}>
-              <Users className="w-3.5 h-3.5" /> The Team Behind Arvix Labs
-            </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-6">
-              Built with <span className="gradient-text">Purpose.</span>
-              <br />Driven by <span className="gradient-text-gold">Vision.</span>
+          {/* Hero Header */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-black text-[#0A2A66] mb-8 leading-tight">
+              About Arvix Labs
             </h1>
-            <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
-              Arvix Labs was founded on the belief that government data intelligence should be transparent,
-              efficient, and citizen-first — powered by cutting-edge AI technology.
+            <p className="text-slate-600 text-lg md:text-xl font-medium leading-relaxed">
+              Arvix Labs is an organization dedicated to the ethical implementation of AI in state administration. We build tools that prioritize citizen trust and institutional transparency.
             </p>
           </motion.div>
 
-          {/* Mission cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-24">
-            {[
-              { icon: Shield, title: 'Our Mission', desc: 'Democratize access to government data and transparent intelligence through AI-powered systems.', color: '#3b82f6' },
-              { icon: Star,   title: 'Our Vision',  desc: 'Every government decision backed by real data, every citizen query answered with intelligence.', color: '#f59e0b' },
-              { icon: Code2,  title: 'Our Tech',    desc: 'Gemini AI + FAISS RAG pipeline + real-time analytics built for government-grade reliability.', color: '#22d3ee' },
-            ].map((item, i) => {
-              const Icon = item.icon
-              return (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="glass-card p-6 text-center">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-                    style={{ background: `${item.color}15`, border: `1px solid ${item.color}30` }}>
-                    <Icon className="w-6 h-6" style={{ color: item.color }} />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-2">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
-                </motion.div>
-              )
-            })}
-          </div>
-
-          {/* Founders */}
-          <section className="mb-20">
-            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-12">
-              <p className="text-xs font-semibold text-yellow-400 uppercase tracking-[0.3em] mb-3">Leadership</p>
-              <h2 className="text-3xl font-black text-white">Our Founders</h2>
-            </motion.div>
-            <div className="flex flex-wrap justify-center gap-6">
-              {team.founders.map(p => <PersonCard key={p.id} person={p} isFounder={true} />)}
+          {/* Leadership Section */}
+          {(loading || founders.length > 0) && (
+            <div className="space-y-12">
+              <div className="text-center">
+                 <h2 className="text-3xl font-black text-[#0A2A66]">Leadership</h2>
+                 <p className="text-slate-400 text-sm mt-2 font-bold uppercase tracking-[0.2em]">Founding Council</p>
+              </div>
+              {loading ? (
+                <div className="grid md:grid-cols-3 gap-8">
+                  {[1,2,3].map(i => <div key={i} className="gov-card h-80 shimmer" />)}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-3 gap-8">
+                  {founders.map(p => <PersonCard key={p.id} person={p} />)}
+                </div>
+              )}
             </div>
-          </section>
+          )}
 
-          {/* Developers */}
-          <section>
-            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-12">
-              <p className="text-xs font-semibold text-blue-400 uppercase tracking-[0.3em] mb-3">Engineering Team</p>
-              <h2 className="text-3xl font-black text-white">Our Developers</h2>
-            </motion.div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {team.developers.map(p => <PersonCard key={p.id} person={p} isFounder={false} />)}
+          {/* Engineering Section */}
+          {!loading && developers.length > 0 && (
+            <div className="space-y-12">
+              <div className="text-center">
+                 <h2 className="text-3xl font-black text-[#0A2A66]">Our Team</h2>
+                 <p className="text-slate-400 text-sm mt-2 font-bold uppercase tracking-[0.2em]">System Architects & Developers</p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-8">
+                {developers.map(p => <PersonCard key={p.id} person={p} />)}
+              </div>
             </div>
-          </section>
+          )}
         </div>
       </div>
+
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      <footer className="bg-secondary py-12 px-6 border-t mt-auto">
+         <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 font-semibold text-xs uppercase tracking-widest">
+            <p>© 2024 Arvix Labs — Dedicated to Open Governance</p>
+            <div className="flex gap-8">
+               <a href="#" className="hover:text-primary transition-colors">Legal</a>
+               <a href="#" className="hover:text-primary transition-colors">Press</a>
+               <a href="#" className="hover:text-primary transition-colors">Transparency</a>
+            </div>
+         </div>
+      </footer>
 
       <ChatBot />
     </div>

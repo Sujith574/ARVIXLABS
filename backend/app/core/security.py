@@ -49,8 +49,8 @@ async def get_current_admin(token: str = Depends(oauth2_scheme)):
         )
     return payload
 
-# Shorthand dependency alias used in CMS/media/founders routes
-require_admin = Depends(get_current_admin)
+# Shorthand dependency alias
+require_admin = get_current_admin
 
 # ── Legacy multi-role dependency (kept for backward compat with grievances/analytics) ──
 async def get_current_user(token: str = Depends(oauth2_scheme)):

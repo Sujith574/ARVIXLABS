@@ -93,3 +93,17 @@ class ActivityLog(Base):
     details = Column(Text)
     ip_address = Column(String(50))
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class TeamMember(Base):
+    __tablename__ = "team_members"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    name = Column(String(255), nullable=False)
+    role = Column(String(255), nullable=False)
+    bio = Column(Text, nullable=True)
+    image_url = Column(String, nullable=True)
+    linkedin = Column(String, nullable=True)
+    github = Column(String, nullable=True)
+    twitter = Column(String, nullable=True)
+    type = Column(String(50), default="founder") # founder | developer | advisor
+    created_at = Column(DateTime, default=datetime.utcnow)

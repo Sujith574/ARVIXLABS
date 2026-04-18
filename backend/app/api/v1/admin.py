@@ -12,7 +12,7 @@ router = APIRouter(prefix="/admin", tags=["Admin Panel"])
 # ─── USERS ────────────────────────────────────────────────────────────────────
 @router.get("/users", response_model=List[UserOut])
 async def list_users(
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     return db.query(User).order_by(User.created_at.desc()).all()
@@ -21,7 +21,7 @@ async def list_users(
 async def update_user_role(
     user_id: str,
     role: str,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.id == user_id).first()
@@ -34,7 +34,7 @@ async def update_user_role(
 @router.patch("/users/{user_id}/toggle")
 async def toggle_user(
     user_id: str,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.id == user_id).first()
@@ -47,7 +47,7 @@ async def toggle_user(
 @router.delete("/users/{user_id}")
 async def delete_user(
     user_id: str,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.id == user_id).first()
@@ -65,7 +65,7 @@ async def list_departments(db: Session = Depends(get_db)):
 @router.post("/departments", response_model=DepartmentOut, status_code=201)
 async def create_department(
     payload: DepartmentCreate,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     dept = Department(id=str(uuid.uuid4()), **payload.dict())
@@ -78,7 +78,7 @@ async def create_department(
 async def update_department(
     dept_id: str,
     payload: DepartmentCreate,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     dept = db.query(Department).filter(Department.id == dept_id).first()
@@ -93,7 +93,7 @@ async def update_department(
 @router.delete("/departments/{dept_id}")
 async def delete_department(
     dept_id: str,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     dept = db.query(Department).filter(Department.id == dept_id).first()
@@ -111,7 +111,7 @@ async def list_categories(db: Session = Depends(get_db)):
 @router.post("/categories", response_model=CategoryOut, status_code=201)
 async def create_category(
     payload: CategoryCreate,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     cat = Category(id=str(uuid.uuid4()), **payload.dict())
@@ -123,7 +123,7 @@ async def create_category(
 @router.delete("/categories/{cat_id}")
 async def delete_category(
     cat_id: str,
-    current_user: dict = Depends(require_role("super_admin")),
+    current_user: dict = Depends(require_role("admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     cat = db.query(Category).filter(Category.id == cat_id).first()

@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: 'The future of government grievance management',
     type: 'website',
   },
+  verification: {
+    google: '9gJWzTwkNrPzu1MoP5qL9sVrTfSR_DTLBAeDItUvOWw',
+  },
 }
 
 export default function RootLayout({

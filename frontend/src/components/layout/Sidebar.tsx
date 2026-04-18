@@ -40,7 +40,7 @@ const navSections = [
   {
     title: 'System',
     items: [
-      { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+      { href: '/dashboard/admin/settings', icon: Settings, label: 'Settings' },
       { href: '/dashboard/logs', icon: Activity, label: 'Activity Logs' },
     ],
   },

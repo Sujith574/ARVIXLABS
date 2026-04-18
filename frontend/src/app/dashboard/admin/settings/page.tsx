@@ -19,7 +19,7 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` })
+  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token') || localStorage.getItem('admin_token')}` })
 
   useEffect(() => {
     const fetchSettings = async () => {

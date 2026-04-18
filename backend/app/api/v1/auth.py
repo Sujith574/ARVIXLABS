@@ -69,7 +69,8 @@ async def request_otp(data: OTPRequest, db: Session = Depends(get_db)):
     if not admin_node and data.email != "arvixlabs@gmail.com":
         raise HTTPException(status_code=403, detail="Identity not registered in Arvix Oversight Hub")
     
-    otp_code = "123456"
+    import secrets
+    otp_code = str(secrets.randbelow(900000) + 100000)  # Random 6-digit OTP
     expires_at = datetime.utcnow() + timedelta(minutes=5)
     
     # Cycle existing tokens

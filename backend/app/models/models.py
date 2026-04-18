@@ -71,6 +71,7 @@ class Complaint(Base):
     embedding_id = Column(String, nullable=True)  # FAISS index reference
 
     attachment_url = Column(String, nullable=True)
+    remarks = Column(Text, nullable=True) # Admin resolution notes
     sla_deadline = Column(DateTime, nullable=True)
     resolved_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -37,10 +37,10 @@ export default function AdminDashboardPage() {
     const h = () => ({ Authorization: `Bearer ${localStorage.getItem('admin_token')}` })
     try {
       const [f, s, fo, st] = await Promise.allSettled([
-        axios.get(`${API}/api/v1/cms/features`),
-        axios.get(`${API}/api/v1/cms/solutions`),
-        axios.get(`${API}/api/v1/founders/`),
-        axios.get(`${API}/api/v1/cms/stats`),
+        axios.get(`${API}/api/v1/cms/features`, { headers: h() }),
+        axios.get(`${API}/api/v1/cms/solutions`, { headers: h() }),
+        axios.get(`${API}/api/v1/founders/`, { headers: h() }),
+        axios.get(`${API}/api/v1/cms/stats`, { headers: h() }),
       ])
       setCounts({
         features:  f.status  === 'fulfilled' ? f.value.data.length  : 4,

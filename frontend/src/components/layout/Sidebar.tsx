@@ -56,50 +56,65 @@ export default function Sidebar({ userRole = 'citizen', userName = 'User' }: Sid
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#00040d] border-r border-white/5">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #3b82f6, #22d3ee)' }}>
-          <Shield className="w-5 h-5 text-white" />
+      <div className="flex items-center gap-4 px-8 py-10 border-b border-white/5 bg-white/[0.01]">
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/10 bg-white/5 shadow-2xl">
+          <Shield className="w-7 h-7 text-blue-600" />
         </div>
         {!collapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="overflow-hidden">
-            <p className="font-bold text-white text-sm tracking-wide">ARVIX LABS</p>
-            <p className="text-xs text-slate-500">Gov Intelligence</p>
+            <p className="font-black text-white text-xl tracking-tighter uppercase leading-none">ARVIX</p>
+            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mt-1">Intelligence</p>
           </motion.div>
         )}
       </div>
 
-      {/* User info */}
+      {/* User Status Area */}
       {!collapsed && (
-        <div className="mx-3 mt-4 p-3 rounded-xl" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
-          <p className="text-white text-sm font-medium">{userName}</p>
-          <p className="text-xs text-blue-400 capitalize">{userRole.replace('_', ' ')}</p>
+        <div className="mx-6 mt-8 p-5 rounded-[1.5rem] border border-white/5 bg-white/[0.02] shadow-inner relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl -mr-12 -mt-12" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center border border-blue-500/20 text-xs font-black text-blue-400">
+                {userName[0]}
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-black tracking-tight truncate uppercase leading-none">{userName}</p>
+                <div className="flex items-center gap-2 mt-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                    <p className="text-[9px] text-slate-600 uppercase tracking-widest font-black truncate">{userRole.replace('_', ' ')}</p>
+                </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Nav sections */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto scrollbar-hidden">
+      {/* Navigation Registry */}
+      <nav className="flex-1 px-4 py-8 space-y-10 overflow-y-auto scrollbar-hidden">
         {navSections.map((section) => {
           if (section.roles && !section.roles.includes(userRole)) return null
           return (
-            <div key={section.title}>
+            <div key={section.title} className="space-y-4">
               {!collapsed && (
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-widest px-3 mb-2">
-                  {section.title}
-                </p>
+                <div className="flex items-center gap-3 px-4">
+                    <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em]">
+                        {section.title}
+                    </p>
+                    <div className="h-px bg-white/5 flex-1" />
+                </div>
               )}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {section.items.map((item) => {
                   const Icon = item.icon
                   const active = pathname === item.href
                   return (
                     <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}>
-                      <div className={`nav-item ${active ? 'active' : ''}`}>
-                        <Icon className="w-4 h-4 flex-shrink-0" />
-                        {!collapsed && <span>{item.label}</span>}
-                        {!collapsed && active && <ChevronRight className="w-3 h-3 ml-auto" />}
+                      <div className={`nav-item ${active ? 'active !bg-blue-600/10 !border-blue-500/20 !text-white' : 'text-slate-500 hover:!text-white'} group`}>
+                        <Icon className={`w-4 h-4 flex-shrink-0 transition-colors ${active ? 'text-blue-500' : 'group-hover:text-blue-400'}`} />
+                        {!collapsed && <span className="text-xs font-black uppercase tracking-widest leading-none pt-0.5">{item.label}</span>}
+                        {!collapsed && active && (
+                          <div className="w-1 h-3 rounded-full bg-blue-500 ml-auto shadow-[0_0_12px_#3b82f6]" />
+                        )}
                       </div>
                     </Link>
                   )
@@ -110,12 +125,12 @@ export default function Sidebar({ userRole = 'citizen', userName = 'User' }: Sid
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 pb-4 border-t border-white/5 pt-4">
+      {/* Terminal Footer */}
+      <div className="px-4 pb-8 border-t border-white/5 pt-6 bg-white/[0.01]">
         <Link href="/">
-          <div className="nav-item text-red-400 hover:text-red-300 hover:bg-red-500/10">
-            <LogOut className="w-4 h-4 flex-shrink-0" />
-            {!collapsed && <span>Sign Out</span>}
+          <div className="nav-item text-red-500 hover:bg-red-500/10 hover:border-red-500/20 group">
+            <LogOut className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
+            {!collapsed && <span className="text-xs font-black uppercase tracking-widest">Terminate Session</span>}
           </div>
         </Link>
       </div>
@@ -126,17 +141,16 @@ export default function Sidebar({ userRole = 'citizen', userName = 'User' }: Sid
     <>
       {/* Desktop sidebar */}
       <motion.aside
-        animate={{ width: collapsed ? 72 : 256 }}
+        animate={{ width: collapsed ? 80 : 280 }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="hidden lg:flex flex-col h-screen sticky top-0 overflow-hidden flex-shrink-0"
-        style={{ background: 'rgba(0, 8, 40, 0.8)', backdropFilter: 'blur(20px)', borderRight: '1px solid rgba(255,255,255,0.05)' }}
+        className="hidden lg:flex flex-col h-screen sticky top-0 overflow-hidden flex-shrink-0 border-right border-white/5 z-40"
       >
         <SidebarContent />
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute right-3 top-6 w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-[#1e293b] border border-white/10 flex items-center justify-center transition-all hover:border-blue-500/50 group"
         >
-          <ChevronRight className={`w-3 h-3 text-slate-400 transition-transform ${collapsed ? '' : 'rotate-180'}`} />
+          <ChevronRight className={`w-3 h-3 text-slate-400 transition-transform ${collapsed ? '' : 'rotate-180'} group-hover:text-blue-400`} />
         </button>
       </motion.aside>
 

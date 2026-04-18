@@ -40,13 +40,9 @@ export default function AdminAIPage() {
         headers: { ...headers(), 'Content-Type': 'multipart/form-data' }
       })
       setResult(res.data)
-    } catch {
-      setResult({
-        status: 'success',
-        records_processed: Math.floor(50 + Math.random() * 300),
-        embeddings_created: Math.floor(40 + Math.random() * 250),
-        message: 'Data ingested and indexed in FAISS. AI knowledge base updated.'
-      })
+    } catch (err) {
+      console.error("Ingestion error:", err)
+      alert("System failure. Unable to ingest dataset to FAISS index.")
     } finally { setUploading(false) }
   }
 

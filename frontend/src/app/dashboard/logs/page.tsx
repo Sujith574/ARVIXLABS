@@ -8,7 +8,7 @@ import Topbar from '@/components/layout/Topbar'
 const mockLogs = Array.from({ length: 30 }, (_, i) => ({
   id: String(i),
   action: ['LOGIN', 'SUBMIT_COMPLAINT', 'UPDATE_STATUS', 'CREATE_DEPARTMENT', 'DELETE_USER', 'AI_CLASSIFY', 'EXPORT_REPORT'][i % 7],
-  user: ['admin@arvixlabs.gov', 'officer@arvixlabs.gov', 'citizen@example.com'][i % 3],
+  user: ['arvixlabs@gmail.com', 'officer@arvixlabs.gov', 'citizen@example.com'][i % 3],
   resource_type: ['complaint', 'user', 'department', 'category', 'system'][i % 5],
   resource_id: `ID-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
   ip_address: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,

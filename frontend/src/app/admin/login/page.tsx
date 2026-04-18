@@ -182,7 +182,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center mt-10 text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
-           Institutional Grade Security — Arvix v2.1
+           Sovereign Grade Security — Arvix v2.4
         </p>
       </motion.div>
     </div>

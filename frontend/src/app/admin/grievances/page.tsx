@@ -57,7 +57,11 @@ export default function AdminGrievancesPage() {
       )
       setGrievances(prev => prev.map(g => g.id === selected.id ? res.data : g))
       setSelected(res.data)
-    } catch { } finally { setUpdating(false) }
+      alert("Status updated successfully")
+    } catch (err) {
+      console.error("Status update error:", err)
+      alert("Failed to update status")
+    } finally { setUpdating(false) }
   }
 
   const handleDelete = async (id: string) => {

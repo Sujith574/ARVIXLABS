@@ -58,3 +58,10 @@ class AdminOTP(Base):
     otp_code = Column(String)
     expires_at = Column(DateTime)
     is_active = Column(Boolean, default=True)
+
+class ApprovedAdmin(Base):
+    __tablename__ = "approved_admins"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    added_at = Column(DateTime, default=datetime.utcnow)
+    role = Column(String, default="admin")

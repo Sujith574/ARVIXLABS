@@ -20,7 +20,7 @@ DEPARTMENTS = [
 ]
 
 async def classify_complaint(title: str, description: str) -> dict:
-    """Use Gemini to classify a complaint into category, priority, department, and generate a summary."""
+    """Use Arvix AI to classify a complaint into category, priority, department, and generate a summary."""
     if not settings.GEMINI_API_KEY:
         return {
             "category": "Other",
@@ -60,7 +60,7 @@ Return JSON with exactly these fields:
     }
 
 async def generate_summary(text: str) -> str:
-    """Generate a concise summary using Gemini."""
+    """Generate a concise summary using Arvix AI."""
     if not settings.GEMINI_API_KEY:
         return text[:200]
     try:
@@ -74,9 +74,9 @@ async def chat_with_ai(message: str, context: str = "") -> str:
     if not settings.GEMINI_API_KEY:
         return "AI service is not configured. Please contact your administrator."
     
-    system_prompt = """You are a helpful government grievance assistant for Arvix Labs.
-Help citizens understand how to file complaints, track status, and get information about government services.
-Be professional, empathetic, and concise."""
+    system_prompt = """You are Arvix AI, a highly intelligent and professional government grievance assistant.
+Your purpose is to help citizens navigate government services, understand how to file complaints, and track their status with expert-level precision.
+Be empathetic, direct, and technically accurate."""
 
     full_prompt = f"{system_prompt}\n\nContext: {context}\n\nUser: {message}\n\nAssistant:"
     try:

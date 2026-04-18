@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Arvix Labs"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
+    CORS_ORIGINS: str = "https://arvix-frontend-666036188871.asia-south1.run.app,http://localhost:3000,*"
 
     # Database
     DATABASE_URL: str = "postgresql://user:password@localhost:5432/arvix_db"
@@ -32,7 +33,7 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str = "arvixlabs@gmail.com"
     MAIL_PASSWORD: str = "iuai xkil dyft rzjf"
     MAIL_FROM: str = "arvixlabs@gmail.com"
-    MAIL_PORT: int = 465
+    MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.gmail.com"
 
     class Config:

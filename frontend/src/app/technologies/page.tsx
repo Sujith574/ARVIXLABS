@@ -10,16 +10,15 @@ import {
   Zap, 
   Lock, 
   Globe, 
-  ArrowRight, 
-  Menu, 
-  X,
+  ArrowRight,
+  Server,
+  CheckCircle,
   Code2,
   Layers,
-  Activity,
-  Server,
-  CheckCircle
+  Activity
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import Navbar from '@/components/layout/Navbar'
 
 const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
@@ -35,7 +34,7 @@ export default function TechnologiesPage() {
 
   const technologies = [
     {
-      title: 'Gemini 2.0 Flash',
+      title: 'Arvix AI',
       description: 'Ultra-low latency inference engine for real-time grievance classification and citizen intelligence.',
       status: 'Active',
       color: '#3B82F6',
@@ -79,41 +78,23 @@ export default function TechnologiesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA]">
-      
-      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
-      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-5'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-             </div>
-             <span className="font-display font-black text-[#0A2A66] text-2xl tracking-tighter">ARVIX LABS</span>
-          </Link>
-          <div className="hidden lg:flex items-center gap-10">
-            {['Home', 'Grievance', 'Technologies', 'Analytics', 'Founders'].map(l => (
-              <Link key={l} href={l === 'Home' ? '/' : `/${l.toLowerCase()}`} className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">
-                {l}
-              </Link>
-            ))}
-          </div>
-          <Link href="/grievance" className="hidden lg:block gov-gradient-button px-6 py-2.5 text-sm">Submit Grievance</Link>
-        </div>
-      </nav>
+    <div className="min-h-screen arvix-gradient-bg selection:bg-arvix-accent selection:text-slate-950">
+      <div className="noise" />
+      <Navbar />
 
-      <div className="pt-20 pb-32 px-6 overflow-hidden relative">
-        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+      <div className="pt-32 pb-48 px-6 overflow-hidden relative">
+        <div className="aurora opacity-20" />
+        <div className="absolute inset-0 grid-overlay opacity-10 pointer-events-none" />
         <div className="max-w-7xl mx-auto space-y-32 relative z-10">
 
           {/* Hero */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-4xl mx-auto">
-             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-6">
-                <Layers className="w-3.5 h-3.5" /> Core Infrastructure
-             </span>
-             <h1 className="text-5xl md:text-7xl font-display font-black text-[#0A2A66] mb-8 tracking-tight leading-[1.1]">
-                Technological <span className="gradient-text">Excellence</span>
+             <span className="text-arvix-accent text-xs font-black uppercase tracking-[0.5em] mb-10 block">System Architecture</span>
+             <h1 className="text-7xl md:text-9xl font-display font-black leading-none tracking-tighter mb-10 arvix-text-gradient">
+                Core <br/>
+                <span className="arvix-accent-gradient">Intelligence</span>
              </h1>
-             <p className="text-slate-500 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto">
+             <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-2xl mx-auto">
                 Arvix Labs utilizes a state-of-the-art stack to deliver government-grade reliability and security at internet speed.
              </p>
           </motion.div>
@@ -126,21 +107,21 @@ export default function TechnologiesPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="gov-card group hover:shadow-2xl transition-all duration-500 border-slate-200">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 group-hover:bg-blue-50 transition-colors" style={{ color: tech.color }}>
+                className="arvix-card group hover:border-arvix-accent/20 transition-all duration-500 border-white/5">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-arvix-accent group-hover:text-slate-950 transition-all duration-500" style={{ color: tech.color }}>
                    <tech.icon className="w-7 h-7" />
                 </div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-bold tracking-tight">{tech.title}</h3>
-                  <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-white border border-slate-100 text-slate-400 group-hover:text-blue-500 cursor-default transition-colors">
+                  <h3 className="text-2xl font-bold tracking-tight text-white">{tech.title}</h3>
+                  <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded bg-white/5 border border-white/10 text-white/30 group-hover:text-arvix-accent cursor-default transition-colors">
                      {tech.status}
                   </span>
                 </div>
-                <p className="text-slate-500 font-medium leading-relaxed mb-8">
+                <p className="text-slate-500 font-medium leading-relaxed mb-8 h-20 overflow-hidden text-ellipsis line-clamp-3">
                   {tech.description}
                 </p>
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-300 group-hover:text-primary transition-all">
-                   View Documentation <ArrowRight className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-white/20 group-hover:text-arvix-accent transition-all">
+                   Audit Spec <ArrowRight className="w-4 h-4" />
                 </div>
               </motion.div>
             ))}
@@ -205,8 +186,8 @@ export default function TechnologiesPage() {
         </div>
       </div>
 
-      <footer className="bg-white py-12 px-6 border-t mt-auto text-center font-display font-black uppercase tracking-[0.2em] text-[10px] text-slate-400">
-         © 2024 Arvix Labs — Technological Integrity Dashboard
+      <footer className="py-20 px-6 border-t border-white/5 text-center">
+         <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.5em]">© 2026 Arvix Labs — Technological Integrity Dashboard</p>
       </footer>
 
       <ChatBot />

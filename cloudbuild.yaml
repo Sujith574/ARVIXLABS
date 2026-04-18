@@ -13,7 +13,7 @@ steps:
       - deploy
       - arvix-backend
       - '--image=gcr.io/$PROJECT_ID/arvix-backend'
-      - '--region=us-central1'
+      - '--region=asia-south1'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--memory=512Mi'
@@ -24,14 +24,13 @@ steps:
       - '--set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest,SECRET_KEY=SECRET_KEY:latest,ADMIN_USERNAME=ADMIN_USERNAME:latest,ADMIN_PASSWORD=ADMIN_PASSWORD:latest'
 
   # ── Frontend ───────────────────────────────────────────────────────────────
-  # Baking in the backend URL at build time for high performance and low cost
   - name: 'gcr.io/cloud-builders/docker'
     args: 
       - build 
       - '-t'
       - 'gcr.io/$PROJECT_ID/arvix-frontend'
       - '--build-arg'
-      - 'NEXT_PUBLIC_API_URL=https://arvix-backend-dmypaoadja-uc.a.run.app'
+      - 'NEXT_PUBLIC_API_URL=https://arvix-backend-666036188871.asia-south1.run.app'
       - '-f'
       - 'frontend/Dockerfile'
       - './frontend'
@@ -46,7 +45,7 @@ steps:
       - deploy
       - arvix-frontend
       - '--image=gcr.io/$PROJECT_ID/arvix-frontend'
-      - '--region=us-central1'
+      - '--region=asia-south1'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--memory=512Mi'

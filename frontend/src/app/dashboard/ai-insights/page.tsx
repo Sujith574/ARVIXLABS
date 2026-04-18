@@ -61,7 +61,7 @@ export default function AIInsightsPage() {
 
   return (
     <div className="min-h-screen">
-      <Topbar title="AI Intelligence" subtitle="Gemini-powered pattern analysis & recommendations" />
+      <Topbar title="AI Intelligence" subtitle="Arvix AI-powered pattern analysis & recommendations" />
       <div className="px-6 py-6 space-y-6">
 
         {/* Header banner */}
@@ -75,7 +75,7 @@ export default function AIInsightsPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-white font-bold text-lg">Gemini AI Analysis</h2>
+                <h2 className="text-white font-bold text-lg">Arvix AI Analysis</h2>
                 <span className="px-2 py-0.5 rounded-full text-xs font-medium text-purple-300"
                   style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)' }}>
                   Live

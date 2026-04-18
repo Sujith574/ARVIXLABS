@@ -43,7 +43,10 @@ export default function AdminTechnologiesPage() {
         setTechs(t => [...t, r.data])
       }
       setModal(false)
-    } catch { } finally { setSaving(false) }
+    } catch (err) {
+      console.error("Save technology error:", err)
+      alert("Failed to save technology record")
+    } finally { setSaving(false) }
   }
 
   const handleDelete = async (id: string) => {

@@ -41,7 +41,7 @@ async def get_current_admin(token: str = Depends(oauth2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     payload = decode_token(token)
-    if payload is None or payload.get("role") != "admin":
+    if payload is None or payload.get("role") not in ["admin", "super_admin"]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired admin token",

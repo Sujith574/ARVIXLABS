@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, FileText, CheckCircle, Clock, AlertCircle, ArrowRight, Shield, Menu, X } from 'lucide-react'
+import { Search, FileText, CheckCircle, Clock, AlertCircle, ArrowRight, Shield, Menu, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import axios from 'axios'
 import dynamic from 'next/dynamic'
+import Navbar from '@/components/layout/Navbar'
 
 const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
@@ -46,130 +47,112 @@ export default function TrackPage() {
   const statusData = result ? (statusInfo[result.status] || statusInfo.submitted) : null
 
   return (
-    <div className="min-h-screen bg-white">
-      
-      {/* ── Top Header Strip ──────────────────────────────────────────────── */}
-      <div className="gov-strip hidden md:flex justify-between items-center">
-        <div className="flex items-center gap-2">
-           <span className="w-2 h-2 rounded-full bg-blue-600" />
-           <span>Arvix Labs — Official Tracking Portal</span>
-        </div>
-        <div className="flex items-center gap-4">
-           <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-           <a href="#" className="hover:text-primary transition-colors">Support Center</a>
-        </div>
-      </div>
+    <div className="min-h-screen arvix-gradient-bg selection:bg-arvix-accent selection:text-slate-950">
+      <div className="noise" />
+      <Navbar />
 
-      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary">
-              <Shield className="w-6 h-6 text-white" />
-            </div>
-            <span className="font-extrabold text-[#0A2A66] tracking-tight text-xl uppercase">ARVIX LABS</span>
-          </Link>
+      <div className="pt-32 pb-48 px-6 overflow-hidden relative">
+        <div className="aurora opacity-20" />
+        <div className="absolute inset-0 grid-overlay opacity-10 pointer-events-none" />
 
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-sm text-slate-600 hover:text-primary transition-colors font-semibold">Home</Link>
-            <Link href="/grievance" className="text-sm text-slate-600 hover:text-primary transition-colors font-semibold">Grievance Portal</Link>
-          </div>
-
-          <button className="md:hidden p-2 text-slate-600" onClick={() => setMobileMenu(v => !v)}>
-            {mobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-        
-        {mobileMenu && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className="md:hidden bg-white px-6 pb-6 space-y-4 border-b">
-            <Link href="/" className="block text-sm font-semibold text-slate-600 py-2 border-b">Home</Link>
-            <Link href="/grievance" className="block text-sm font-semibold text-slate-600 py-2">Grievance Portal</Link>
-          </motion.div>
-        )}
-      </nav>
 
       <div className="pt-24 px-6 pb-24 max-w-4xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-black text-[#0A2A66] mb-6">Track Your Grievance</h1>
-          <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto">Enter your assigned Ticket ID below to retrieve the current administrative status and AI-driven resolution insights.</p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-2xl mx-auto mb-20">
+           <span className="text-arvix-accent text-xs font-black uppercase tracking-[0.5em] mb-8 block">Audit Node</span>
+           <h1 className="text-6xl md:text-8xl font-display font-black leading-none tracking-tighter mb-8 arvix-text-gradient">
+              Track <br/>
+              <span className="arvix-accent-gradient">Resolution</span>
+           </h1>
+           <p className="text-slate-400 text-lg font-medium leading-relaxed">Enter your reference ticket code to retrieve immutable status updates from the Arvix Core cluster.</p>
         </motion.div>
 
         {/* Tracking Input */}
-        <div className="gov-card p-10 bg-white mb-12">
+        <div className="arvix-card p-10 border-white/5 mb-12">
           <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 pointer-events-none">Reference Ticket ID</label>
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-2 pointer-events-none ml-2">Audit Reference ID</label>
               <input
                 id="ticket-id-input"
-                className="gov-input py-4 font-mono font-bold text-lg text-[#0A2A66] placeholder:text-slate-200"
+                className="arvix-input !text-2xl !font-black !py-6 tracking-tighter"
                 placeholder="ALX-XXXXXX"
                 value={ticketId}
                 onChange={e => setTicketId(e.target.value)}
               />
             </div>
-            <button type="submit" disabled={loading || !ticketId} className="gov-button px-10 self-end py-4">
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> Retreive Status</>}
+            <button type="submit" disabled={loading || !ticketId} className="arvix-button-primary px-12 self-end py-6">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> Locate Record</>}
             </button>
           </form>
-          {error && <div className="mt-6 p-4 bg-red-50 border border-red-100 text-red-700 text-sm font-bold rounded flex items-center gap-2"><AlertCircle className="w-5 h-5" /> {error}</div>}
+          {error && <div className="mt-8 p-6 bg-red-400/10 text-red-400 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-red-400/20 flex items-center gap-4"><AlertCircle className="w-5 h-5" /> {error}</div>}
         </div>
 
         {/* Result */}
         {result && statusData && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="gov-card p-10 bg-white overflow-hidden">
-             <div className="flex flex-col md:flex-row md:items-start justify-between mb-10 gap-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="arvix-card !p-0 overflow-hidden border-white/5 shadow-2xl transition-all">
+             <div className="bg-white/5 p-12 flex flex-col sm:flex-row justify-between items-center gap-10 border-b border-white/5">
                 <div className="flex items-center gap-5">
-                   <div className="w-14 h-14 rounded-lg flex items-center justify-center bg-secondary border border-slate-200">
-                      <statusData.icon className="w-7 h-7" style={{ color: statusData.color }} />
+                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/5 border border-white/10">
+                      <statusData.icon className="w-8 h-8 text-arvix-accent" />
                    </div>
                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Docket Reference</p>
-                      <p className="text-2xl font-black text-[#0A2A66] tracking-tight">{result.ticket_id}</p>
+                      <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">Audit Record</p>
+                      <p className="text-4xl font-display font-black text-white tracking-tighter">{result.ticket_id}</p>
                    </div>
                 </div>
-                <div className="px-4 py-2 rounded-md font-bold text-xs uppercase tracking-[0.1em] border"
-                  style={{ background: statusData.bg, color: statusData.color, borderColor: statusData.border }}>
+                <div className="px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest border border-white/10 bg-white text-slate-950 shadow-2xl">
                   {statusData.label}
                 </div>
              </div>
 
-             <div className="space-y-8">
+             <div className="p-12 space-y-12">
                 <div>
-                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Subject Matter</h4>
-                   <p className="text-xl font-bold text-slate-800 leading-tight">{result.title}</p>
+                   <h4 className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em] mb-3">Log Entry</h4>
+                   <p className="text-2xl font-bold text-white tracking-tight">{result.title}</p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-slate-100">
-                   <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">AI Category</p>
-                      <p className="text-sm font-bold text-slate-700">{result.ai_category}</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 pb-12 border-b border-white/5">
+                   <div className="space-y-2">
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">AI Node</p>
+                      <p className="text-sm font-bold text-white">{result.ai_category}</p>
                    </div>
-                   <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Priority</p>
-                      <p className="text-sm font-bold text-slate-700 capitalize">{result.ai_priority || result.priority}</p>
+                   <div className="space-y-2">
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Priority</p>
+                      <p className="text-sm font-bold text-arvix-accent uppercase tracking-widest">{result.ai_priority || result.priority}</p>
                    </div>
-                   <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Department</p>
-                      <p className="text-sm font-bold text-slate-700">{result.ai_department || 'General'}</p>
+                   <div className="space-y-2">
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Unit</p>
+                      <p className="text-sm font-bold text-white">{result.ai_department || 'General'}</p>
                    </div>
-                   <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Filed Date</p>
-                      <p className="text-sm font-bold text-slate-700">{new Date(result.created_at).toLocaleDateString()}</p>
+                   <div className="space-y-2">
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Timestamp</p>
+                      <p className="text-sm font-bold text-white">{new Date(result.created_at).toLocaleDateString()}</p>
                    </div>
                 </div>
 
-                {result.ai_summary && (
-                   <div className="bg-secondary p-6 rounded-md border border-slate-200">
-                      <p className="text-[10px] font-black text-[#0A2A66] uppercase tracking-widest mb-3">AI Case Summary</p>
-                      <p className="text-sm text-slate-600 leading-relaxed font-medium italic">"{result.ai_summary}"</p>
+                {result.ai_summary && !result.remarks && (
+                   <div className="bg-white/5 p-8 rounded-2xl border border-white/5 italic">
+                      <p className="text-[8px] font-black text-arvix-accent uppercase tracking-widest mb-4">Neural Summary</p>
+                      <p className="text-sm text-slate-400 leading-relaxed font-medium transition-all">"{result.ai_summary}"</p>
+                   </div>
+                )}
+
+                {result.remarks && (
+                   <div className="bg-blue-500/5 p-8 rounded-2xl border border-blue-500/20 shadow-[0_0_40px_rgba(59,130,246,0.05)]">
+                      <div className="flex items-center gap-3 mb-4">
+                         <div className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                            <Shield className="w-3 h-3 text-blue-400" />
+                         </div>
+                         <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Administrative Resolution Remarks</p>
+                      </div>
+                      <p className="text-base text-white leading-relaxed font-semibold">
+                         {result.remarks}
+                      </p>
                    </div>
                 )}
              </div>
           </motion.div>
         )}
-      </div>
-
+      </div></div>
       <ChatBot />
     </div>
   )

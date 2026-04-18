@@ -167,7 +167,7 @@ export default function PublicPortalPage() {
       {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <footer className="bg-secondary py-12 px-6 border-t mt-auto">
          <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 font-semibold text-xs uppercase tracking-widest text-center">
-            <p>© 2024 Arvix Labs — Official Government Intelligence Portal</p>
+            <p>© 2026 Arvix Labs — Official Government Intelligence Portal</p>
          </div>
       </footer>
 

@@ -8,7 +8,7 @@ from app.core.config import settings
 
 class VectorService:
     def __init__(self):
-        self.dimension = 768  # gemini-embedding-004
+        self.dimension = 768  # arvix-embedding-004
         self.index_path = "vector_index.faiss"
         self.metadata_path = "vector_metadata.json"
         

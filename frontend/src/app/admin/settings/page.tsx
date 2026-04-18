@@ -58,7 +58,7 @@ export default function AdminSettingsPage() {
       </Section>
 
       <Section id="api" title="API Keys" icon={Settings} color="#3b82f6">
-        <Field label="Gemini API Key" placeholder="AIza…" />
+        <Field label="Arvix AI API Key" placeholder="AIza…" />
         <Field label="Firebase Project ID" placeholder="your-project-id" />
         <Field label="Firebase Storage Bucket" placeholder="your-project.appspot.com" />
       </Section>

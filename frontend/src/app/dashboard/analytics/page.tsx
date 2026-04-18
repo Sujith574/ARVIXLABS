@@ -16,14 +16,7 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const COLORS = ['#3b82f6', '#22d3ee', '#a78bfa', '#f59e0b', '#10b981', '#f97316', '#ef4444']
 
-const mockTrend = [
-  { month: 'Oct', submitted: 48, resolved: 32 },
-  { month: 'Nov', submitted: 62, resolved: 55 },
-  { month: 'Dec', submitted: 55, resolved: 48 },
-  { month: 'Jan', submitted: 78, resolved: 61 },
-  { month: 'Feb', submitted: 91, resolved: 80 },
-  { month: 'Mar', submitted: 84, resolved: 78 },
-]
+const mockTrend: any[] = []
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
@@ -68,30 +61,11 @@ export default function AnalyticsPage() {
 
   useEffect(() => { fetchAll() }, [])
 
-  const deptData = byDept.length ? byDept : [
-    { department: 'Public Works', count: 34 },
-    { department: 'Water Dept', count: 28 },
-    { department: 'Transport', count: 19 },
-    { department: 'Health', count: 22 },
-    { department: 'Education', count: 15 },
-  ]
+  const deptData = byDept
 
-  const catData = byCategory.length ? byCategory.slice(0, 7) : [
-    { category: 'Infrastructure', count: 45 },
-    { category: 'Water Supply', count: 32 },
-    { category: 'Electricity', count: 27 },
-    { category: 'Sanitation', count: 21 },
-    { category: 'Healthcare', count: 19 },
-    { category: 'Roads', count: 16 },
-    { category: 'Other', count: 12 },
-  ]
+  const catData = byCategory.slice(0, 7)
 
-  const priData = byPriority.length ? byPriority : [
-    { priority: 'critical', count: 12 },
-    { priority: 'high', count: 34 },
-    { priority: 'medium', count: 67 },
-    { priority: 'low', count: 45 },
-  ]
+  const priData = byPriority
 
   return (
     <div className="min-h-screen">

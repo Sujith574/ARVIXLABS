@@ -21,45 +21,42 @@ class ChatResponse(BaseModel):
 class ContextIn(BaseModel):
     text: str
 
-# ── Gemini AI helper ───────────────────────────────────────────────────────────
+# ── Arvix AI helper ─────────────────────────────────────────────────────────────
 
-async def _gemini_chat(message: str) -> str:
+async def _arvix_ai_chat(message: str) -> str:
     try:
         # 1. Search for context in FAISS
         contexts = await vector_service.search(message)
         context_text = "\n".join(contexts) if contexts else "No specific context found."
         
         # 2. Generate response with gemini-2.0-flash
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY", ""))
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY", ""), transport='rest')
         model = genai.GenerativeModel("gemini-2.0-flash")
         
         prompt = (
-            f"You are the Arvix Labs AI Intelligence Engine. Your goal is to provide deep, direct, and helpful answers to ALL types of queries.\n\n"
-            f"INSTRUCTION:\n"
-            f"1. If the provide context below contains relevant data, prioritize it.\n"
-            f"2. If the context is empty or irrelevant, use your full direct knowledge as Gemini 2.0 to answer the query comprehensively.\n"
-            f"3. Always maintain a professional, administrative, and helpful tone.\n\n"
-            f"CONTEXT FROM INTERNAL DATABASE:\n{context_text}\n\n"
+            f"You are Arvix AI, a highly advanced intelligence engine. Your goal is to provide deep, technical, and extremely helpful answers directly. "
+            f"Respond with the same clarity, depth, and directness as a world-class large language model.\n\n"
+            f"CONTEXT:\n{context_text}\n\n"
             f"USER QUERY: {message}\n\n"
-            f"DIRECT ANSWER:"
+            f"ARVIX RESPONSE:"
         )
         
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, request_options={"timeout": 20.0})
         return response.text
     except Exception as e:
         print(f"AI Error: {e}")
         return (
-            "The AI Intelligence Engine is stabilizing. Arvix Labs uses gemini-2.0-flash with "
-            "FAISS RAG pipeline. Please ensure your GEMINI_API_KEY is valid to get live insights."
+            "Neural link instability detected. Arvix AI core is currently synchronizing with the global node. "
+            "Please re-initialize your request or verify your administrative credentials."
         )
 
 # ── Chat ───────────────────────────────────────────────────────────────────────
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(payload: ChatMessage):
-    """Public AI chat endpoint — uses RAG + Gemini 2.0 Flash."""
+    """Public AI chat endpoint — uses RAG + Arvix Intelligence Engine."""
     session_id = payload.session_id or str(uuid.uuid4())
-    response = await _gemini_chat(payload.message)
+    response = await _arvix_ai_chat(payload.message)
     return ChatResponse(response=response, session_id=session_id)
 
 # ── Context Ingestion (Admin) ───────────────────────────────────────────────────

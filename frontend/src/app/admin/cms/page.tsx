@@ -38,19 +38,35 @@ export default function AdminCMSPage() {
   const [statModal, setStatModal] = useState(false)
   const [statSaving, setStatSaving] = useState(false)
 
-  useEffect(() => {
-    axios.get(`${API}/api/v1/cms/settings`).then(r => setSettings(r.data)).catch(() => {})
-    axios.get(`${API}/api/v1/cms/features`).then(r => setFeatures(r.data)).catch(() => {})
-    axios.get(`${API}/api/v1/cms/solutions`).then(r => setSolutions(r.data)).catch(() => {})
-    axios.get(`${API}/api/v1/cms/stats`).then(r => setStats(r.data)).catch(() => {})
-  }, [])
+  const loadAll = async () => {
+    try {
+      const [s, f, sol, st] = await Promise.all([
+        axios.get(`${API}/api/v1/cms/settings`),
+        axios.get(`${API}/api/v1/cms/features`),
+        axios.get(`${API}/api/v1/cms/solutions`),
+        axios.get(`${API}/api/v1/cms/stats`),
+      ])
+      setSettings(s.data)
+      setFeatures(f.data)
+      setSolutions(sol.data)
+      setStats(st.data)
+    } catch (err) {
+      console.error("Failed to load CMS data:", err)
+    }
+  }
+
+  useEffect(() => { loadAll() }, [])
 
   // Save hero settings
   const saveSettings = async () => {
     setSettingsSaving(true)
     try {
       await axios.put(`${API}/api/v1/cms/settings`, settings, { headers: headers() })
-    } catch { } finally { setSettingsSaving(false) }
+      alert("Settings updated successfully")
+    } catch (err) { 
+      console.error("Save settings error:", err)
+      alert("Failed to save settings")
+    } finally { setSettingsSaving(false) }
   }
 
   // Features CRUD
@@ -65,7 +81,10 @@ export default function AdminCMSPage() {
         setFeatures(f => [...f, res.data])
       }
       setFeatureModal(false)
-    } catch { } finally { setFeatureSaving(false) }
+    } catch (err) {
+      console.error("Save feature error:", err)
+      alert("Failed to save feature")
+    } finally { setFeatureSaving(false) }
   }
   const delFeature = async (id: string) => {
     await axios.delete(`${API}/api/v1/cms/features/${id}`, { headers: headers() })

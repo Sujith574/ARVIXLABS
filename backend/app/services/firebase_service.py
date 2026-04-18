@@ -11,10 +11,17 @@ class FirebaseService:
             # We use environment variables or a service account dict
             try:
                 # Best option: use env vars for Cloud Run compatibility
+                raw_key = settings.FIREBASE_PRIVATE_KEY.strip()
+                if raw_key.startswith('"') and raw_key.endswith('"'):
+                    raw_key = raw_key[1:-1]
+                
+                # Replace literal \n with actual newlines
+                clean_key = raw_key.replace('\\n', '\n')
+                
                 cred_dict = {
                     "type": "service_account",
                     "project_id": settings.FIREBASE_PROJECT_ID,
-                    "private_key": settings.FIREBASE_PRIVATE_KEY.replace('\\n', '\n'),
+                    "private_key": clean_key,
                     "client_email": settings.FIREBASE_CLIENT_EMAIL,
                     "token_uri": "https://oauth2.googleapis.com/token",
                 }

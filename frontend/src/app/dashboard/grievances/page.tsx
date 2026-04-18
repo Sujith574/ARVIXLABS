@@ -32,7 +32,7 @@ export default function GrievancesListPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    axios.get(`${API}/api/v1/grievances/?limit=50`, {
+    axios.get(`${API}/api/v1/grievances/admin/all`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(r => setComplaints(r.data)).catch(() => {}).finally(() => setLoading(false))
   }, [])
@@ -44,66 +44,70 @@ export default function GrievancesListPage() {
   })
 
   return (
-    <div className="min-h-screen">
-      <Topbar title="All Grievances" subtitle="Manage and review complaints" />
-      <div className="px-6 py-6 space-y-6">
+    <div className="min-h-screen bg-[#00040d]">
+      <Topbar title="Grievance Repository" subtitle="Neural complaint filtering & resolution node" />
+      <div className="px-8 py-8 space-y-8 max-w-[1600px] mx-auto">
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input
-              className="input-glass pl-10"
-              placeholder="Search by title or ticket ID…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <select
-            className="input-glass w-full sm:w-48"
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            <option value="submitted">Submitted</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
-          <Link href="/dashboard/grievances/submit" className="btn-glow text-white whitespace-nowrap">
-            + New Complaint
-          </Link>
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+           <div className="flex-1 w-full relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input 
+                className="input-glass pl-12 bg-black/40 border-white/10" 
+                placeholder="DECRYPT TICKET ID OR CASE TITLE…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+           </div>
+           <div className="flex items-center gap-3 w-full lg:w-auto">
+                <select 
+                    className="input-glass lg:w-48 bg-black/40 border-white/10 cursor-pointer font-black text-[10px] uppercase tracking-widest"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                >
+                    <option value="">Status: ALL_NODES</option>
+                    <option value="submitted">SUBMITTED</option>
+                    <option value="under_review">UNDER_REVIEW</option>
+                    <option value="in_progress">IN_PROGRESS</option>
+                    <option value="resolved">RESOLVED</option>
+                </select>
+                <Link href="/dashboard/grievances/submit" className="btn-glow whitespace-nowrap text-xs font-black uppercase tracking-widest">
+                    + New Handshake
+                </Link>
+           </div>
         </div>
 
-        {/* Table */}
-        <div className="glass-card overflow-hidden">
+        {/* Main Records Table */}
+        <div className="glass-card overflow-hidden border-white/5 bg-white/[0.01]">
+          <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+             <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Operational Case Log</h3>
+             <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{filtered.length} Entries Synchronized</div>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  {['Ticket', 'Title', 'Status', 'Priority', 'AI Category', 'SLA Deadline', 'Action'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      {h}
-                    </th>
+                <tr className="bg-black/20 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                  {['Ticket', 'Core Directive / Title', 'Execution Status', 'Severity', 'AI Cluster', 'SLA Clock', 'Handshake'].map(h => (
+                    <th key={h} className="px-6 py-4 text-left font-black">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                    <tr key={i} className="border-b border-white/[0.03]">
                       {Array.from({ length: 7 }).map((_, j) => (
-                        <td key={j} className="px-4 py-4">
-                          <div className="h-4 rounded shimmer" style={{ width: j === 0 ? 80 : j === 1 ? 200 : 100 }} />
+                        <td key={j} className="px-6 py-5">
+                          <div className="h-2 rounded shimmer bg-white/5" style={{ width: j === 1 ? 240 : 100 }} />
                         </td>
                       ))}
                     </tr>
                   ))
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-16 text-center text-slate-600">
-                      <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                      <p>No complaints found</p>
+                    <td colSpan={7} className="px-6 py-24 text-center">
+                       <FileText className="w-12 h-12 text-slate-800 mx-auto mb-4" />
+                       <p className="text-[10px] text-slate-700 font-black uppercase tracking-[0.3em]">No Neural Records Found</p>
                     </td>
                   </tr>
                 ) : (
@@ -112,32 +116,40 @@ export default function GrievancesListPage() {
                       key={c.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="hover:bg-white/[0.02] transition-colors"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
+                      transition={{ delay: i * 0.02 }}
+                      className="hover:bg-white/[0.03] transition-colors border-b border-white/[0.03]"
                     >
-                      <td className="px-4 py-3 font-mono text-blue-400 text-xs">{c.ticket_id}</td>
-                      <td className="px-4 py-3 text-white max-w-xs">
-                        <span className="truncate block">{c.title}</span>
+                      <td className="px-6 py-5">
+                        <span className="font-mono text-blue-500 text-[10px] font-black tracking-widest bg-blue-500/5 px-2 py-1 rounded-lg border border-blue-500/10">#{c.ticket_id}</span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${statusStyles[c.status] || ''}`}>
+                      <td className="px-6 py-5">
+                        <p className="text-white font-bold tracking-tight text-sm line-clamp-1">{c.title}</p>
+                        <p className="text-[10px] text-slate-600 mt-0.5 truncate max-w-xs">{c.description?.substring(0, 40)}...</p>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className={`badge ${statusStyles[c.status] || 'status-pending'} text-[10px] font-black`}>
                           {c.status.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${priorityStyles[c.priority] || ''}`}>
-                          {c.priority}
-                        </span>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                            <span className={`w-1.5 h-1.5 rounded-full ${c.priority === 'critical' ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : c.priority === 'high' ? 'bg-orange-500' : 'bg-blue-400'}`} />
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{c.priority}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">{c.ai_category || '—'}</td>
-                      <td className="px-4 py-3 text-slate-500 text-xs">
+                      <td className="px-6 py-5">
+                         <div className="flex items-center gap-2 text-slate-400">
+                            <Brain className="w-3.5 h-3.5 text-purple-500" />
+                            <span className="text-xs font-bold">{c.ai_category || 'UNCLASSIFIED'}</span>
+                         </div>
+                      </td>
+                      <td className="px-6 py-5 font-mono text-[10px] text-slate-500">
                         {c.sla_deadline ? new Date(c.sla_deadline).toLocaleDateString() : '—'}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-5 text-right">
                         <Link href={`/dashboard/grievances/${c.id}`}
-                          className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs font-medium">
-                          <Eye className="w-3.5 h-3.5" /> View
+                          className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 hover:border-blue-500/50 flex items-center justify-center transition-all group">
+                          <Eye className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
                         </Link>
                       </td>
                     </motion.tr>

@@ -70,8 +70,11 @@ class SiteSettings(BaseModel):
     hero_cta_label: Optional[str] = "Try AI Assistant"
     hero_badge: Optional[str] = "AI-Powered Government Intelligence Platform"
     navbar_links: Optional[List[dict]] = None
-    footer_tagline: Optional[str] = "© 2024 Arvix Labs. All rights reserved."
+    footer_tagline: Optional[str] = "© 2026 Arvix Labs. All rights reserved."
     contact_email: Optional[str] = ""
+    platform_name: Optional[str] = "Arvix Labs"
+    support_email: Optional[str] = "hello@arvixlabs.ai"
+    theme: Optional[str] = "dark"
 
 class Feature(BaseModel):
     id: Optional[str] = None
@@ -111,8 +114,8 @@ DEFAULT_SETTINGS = {
     "hero_subtitle": "Transforming government data into real-time insights and decisions",
     "hero_cta_label": "Try AI Assistant",
     "hero_badge": "AI-Powered Government Intelligence Platform",
-    "footer_tagline": "© 2024 Arvix Labs. All rights reserved.",
-    "contact_email": "hello@arvixlabs.ai",
+    "footer_tagline": "© 2026 Arvix Labs. All rights reserved.",
+    "contact_email": "arvixlabs@gmail.com",
     "navbar_links": [
         {"label": "Home", "href": "/"},
         {"label": "Solutions", "href": "/#solutions"},
@@ -135,7 +138,7 @@ async def update_settings(payload: SiteSettings, _=Depends(require_admin)):
 # ── Features ───────────────────────────────────────────────────────────────────
 
 DEFAULT_FEATURES = [
-    {"id": "f1", "title": "AI Intelligence Engine", "description": "Powered by Gemini + RAG pipeline for semantic search, pattern detection, and automated government insights.", "icon": "Brain", "color": "#3b82f6", "order": 0},
+    {"id": "f1", "title": "AI Intelligence Engine", "description": "Powered by Arvix AI + RAG pipeline for semantic search, pattern detection, and automated government insights.", "icon": "Brain", "color": "#3b82f6", "order": 0},
     {"id": "f2", "title": "Data Analytics Dashboard", "description": "Interactive dashboards tracking real-time data trends, department metrics, and predictive intelligence.", "icon": "BarChart3", "color": "#22d3ee", "order": 1},
     {"id": "f3", "title": "Real-Time Insights", "description": "Live intelligence feeds with automated alerts, pattern recognition, and decision support outputs.", "icon": "Zap", "color": "#a78bfa", "order": 2},
     {"id": "f4", "title": "Scalable SaaS Architecture", "description": "Cloud-native FastAPI + Next.js platform containerized for Google Cloud Run with zero-downtime deployments.", "icon": "Globe", "color": "#10b981", "order": 3},
@@ -168,7 +171,7 @@ async def delete_feature(fid: str, _=Depends(require_admin)):
 
 DEFAULT_SOLUTIONS = [
     {"id": "s1", "title": "Public Grievance Intelligence", "description": "AI-powered citizen complaint analysis, automatic routing, and resolution tracking across all government departments.", "icon": "Users", "color": "#3b82f6", "tags": ["AI", "Governance", "Analytics"], "order": 0},
-    {"id": "s2", "title": "Data Analysis Platform", "description": "Ingest, vectorize, and query any government dataset using FAISS semantic search and Gemini-powered summaries.", "icon": "Database", "color": "#10b981", "tags": ["FAISS", "RAG", "Data"], "order": 1},
+    {"id": "s2", "title": "Data Analysis Platform", "description": "Ingest, vectorize, and query any government dataset using FAISS semantic search and Arvix AI-powered summaries.", "icon": "Database", "color": "#10b981", "tags": ["FAISS", "RAG", "Data"], "order": 1},
     {"id": "s3", "title": "Decision Support System", "description": "Evidence-based intelligence reports generated from live data to support elected officials and administrators.", "icon": "Shield", "color": "#f59e0b", "tags": ["Reports", "Policy", "AI"], "order": 2},
 ]
 

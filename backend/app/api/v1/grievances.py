@@ -19,27 +19,40 @@ def _ticket_id() -> str:
     return "ALX-" + "".join(random.choices(string.digits, k=6))
 
 async def _classify(title: str, description: str) -> dict:
-    """Try Gemini 2.0 Flash classification; fall back to rule-based."""
+    """Try Arvix AI classification; fall back to rule-based."""
     text = f"{title}. {description}"
+    import asyncio
     try:
         import google.generativeai as genai, os
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY", ""))
-        # Use gemini-2.0-flash as requested by user
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        prompt = (
-            "You are an expert government grievance classifier. "
-            "Internalize this grievance and reply with JSON ONLY.\n"
-            "Fields: category (Roads/Water/Electricity/Healthcare/Education/Other), "
-            "priority (low/medium/high/critical), department (Public Works/Water Board/etc), "
-            "summary (1 sentence).\n\nGrievance: " + text
-        )
-        r = model.generate_content(prompt)
-        import re
-        match = re.search(r'\{.*?\}', r.text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
+        from app.core.config import settings
+        
+        api_key = settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")
+        if api_key:
+            genai.configure(api_key=api_key, transport='rest')
+            model = genai.GenerativeModel("gemini-2.0-flash")
+            prompt = (
+                "You are an expert government grievance classifier. "
+                "Internalize this grievance and reply with JSON ONLY.\n"
+                "Fields: category (Roads/Water/Electricity/Healthcare/Education/Other), "
+                "priority (low/medium/high/critical), department (Public Works/Water Board/etc), "
+                "summary (1 sentence).\n\nGrievance: " + text
+            )
+            
+            # Wrap in executor to handle potential library blocking or network hangs
+            loop = asyncio.get_event_loop()
+            r = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: model.generate_content(prompt)),
+                timeout=12.0
+            )
+            
+            import re
+            match = re.search(r'\{.*?\}', r.text, re.DOTALL)
+            if match:
+                return json.loads(match.group())
+    except asyncio.TimeoutError:
+        print(f"[GRIEVANCE] AI Classification timed out for: {title[:50]}...")
     except Exception as e:
-        print(f"Classification error: {e}")
+        print(f"[GRIEVANCE] AI Classification error: {e}")
         pass
     
     # Rule-based fallback
@@ -65,7 +78,8 @@ class GrievanceIn(BaseModel):
 
 class StatusUpdate(BaseModel):
     status: ComplaintStatus
-    note: Optional[str] = None
+    remarks: Optional[str] = None
+    note: Optional[str] = None # alias for remarks if needed
 
 # ── PUBLIC endpoints ───────────────────────────────────────────────────────────
 
@@ -111,6 +125,7 @@ async def submit_grievance(payload: GrievanceIn, db: Session = Depends(get_db)):
         # Notify via Email
         try:
             from app.services.mail_service import mail_service
+            # 1. Internal Alert (to Arvix Team)
             mail_service.send_notification(
                 subject=f"New Grievance: {new_complaint.ticket_id}",
                 body=(
@@ -121,6 +136,14 @@ async def submit_grievance(payload: GrievanceIn, db: Session = Depends(get_db)):
                     f"Description: {new_complaint.description}"
                 )
             )
+            
+            # 2. External Confirmation (to Citizen - Attractive Template)
+            if payload.submitter_email:
+                mail_service.send_ticket_confirmation(
+                    to_email=payload.submitter_email,
+                    ticket_id=new_complaint.ticket_id,
+                    title=new_complaint.title
+                )
         except Exception as mail_err:
             print(f"[GRIEVANCE] Email notification failed (non-critical): {mail_err}")
 
@@ -158,6 +181,11 @@ async def update_status(grievance_id: str, payload: StatusUpdate, db: Session = 
         raise HTTPException(status_code=404, detail="Grievance not found")
     
     item.status = payload.status
+    if payload.remarks:
+        item.remarks = payload.remarks
+    elif payload.note:
+        item.remarks = payload.note
+        
     if payload.status == ComplaintStatus.resolved:
         item.resolved_at = datetime.utcnow()
     

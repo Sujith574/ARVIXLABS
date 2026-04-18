@@ -15,17 +15,10 @@ async def get_public_overview(db: Session = Depends(get_db)):
     resolved = db.query(Complaint).filter(Complaint.status == "resolved").count()
     
     # Mock distribution for variety if DB is sparse
-    if total < 10:
-        mock_total = 1248 + total
-        mock_resolved = 912 + resolved
+    if total == 0:
         return {
-            "total": mock_total,
-            "resolved": mock_resolved,
-            "pending": 156,
-            "in_progress": 180,
-            "critical": 24,
-            "resolution_rate": round((mock_resolved / mock_total * 100), 1),
-            "is_mock": True
+            "total": 0, "resolved": 0, "pending": 0, "in_progress": 0, "critical": 0,
+            "resolution_rate": 0, "is_mock": False
         }
 
     return {
@@ -95,17 +88,25 @@ async def by_priority(
         func.count(Complaint.id).label("count")
     ).group_by(Complaint.priority).all()
 
-    return [{"priority": r[0].value if r[0] else "unknown", "count": r[1]} for r in results]
+    # Format for frontend expects { priority: string, count: number }
+    return [{"priority": (r[0].value if hasattr(r[0], 'value') else str(r[0])), "count": r[1]} for r in results]
 
 @router.get("/trend")
 async def get_trend(
     current_user: dict = Depends(require_role("analyst", "officer", "super_admin")),
     db: Session = Depends(get_db)
 ):
-    """Monthly complaint trend (last 6 months)."""
-    results = db.query(
-        func.date_trunc('month', Complaint.created_at).label("month"),
-        func.count(Complaint.id).label("count")
-    ).group_by("month").order_by("month").limit(6).all()
+    """Monthly complaint trend (last 6 months). Supports SQLite and Postgres."""
+    # SQLite fallback for grouping by month
+    if "sqlite" in str(db.bind.url):
+        results = db.query(
+            func.strftime('%Y-%m', Complaint.created_at).label("month"),
+            func.count(Complaint.id).label("count")
+        ).group_by("month").order_by("month").limit(6).all()
+    else:
+        results = db.query(
+            func.date_trunc('month', Complaint.created_at).label("month"),
+            func.count(Complaint.id).label("count")
+        ).group_by("month").order_by("month").limit(6).all()
 
-    return [{"month": str(r[0])[:7], "count": r[1]} for r in results]
+    return [{"month": str(r[0]), "count": r[1]} for r in results]

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Settings, Save, Key, Globe, Bell, Loader2, CheckCircle, Shield, Zap, Database } from 'lucide-react'
+import { Settings, Save, Key, Globe, Bell, Loader2, CheckCircle, Shield, Zap, Database, Brain } from 'lucide-react'
 import axios from 'axios'
 import Topbar from '@/components/layout/Topbar'
 

@@ -89,3 +89,15 @@ Write-Host "------------------------------------------------------------"
 Write-Host "URL Frontend (Public) : $FRONTEND_URL" -ForegroundColor Green
 Write-Host "URL Backend API       : $BACKEND_URL" -ForegroundColor Cyan
 Write-Host "------------------------------------------------------------"
+
+# --- 7. Sync to GitHub --------------------------------------------------------
+Write-Host "`n[GIT] Syncing to GitHub..." -ForegroundColor Yellow
+$status = git status --porcelain
+if ($status) {
+    git add .
+    git commit -m "Auto-deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    git push origin master
+    Write-Host "[OK] Source code pushed to GitHub for Vercel synchronization." -ForegroundColor Green
+} else {
+    Write-Host "[INFO] No code changes to push." -ForegroundColor Gray
+}

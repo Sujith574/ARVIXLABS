@@ -31,6 +31,7 @@ const navSections = [
     roles: ['super_admin', 'officer'],
     items: [
       { href: '/dashboard/admin/users', icon: Users, label: 'Users' },
+      { href: '/dashboard/admin/founders', icon: Shield, label: 'Founding Council' },
       { href: '/dashboard/admin/departments', icon: Building, label: 'Departments' },
       { href: '/dashboard/admin/categories', icon: Tag, label: 'Categories' },
       { href: '/dashboard/admin/data', icon: Database, label: 'Data Ingestion' },

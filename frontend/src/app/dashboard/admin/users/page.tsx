@@ -29,7 +29,7 @@ export default function AdminUsersPage() {
   const [addingAdmin, setAddingAdmin] = useState(false)
   const [currentEmail, setCurrentEmail] = useState('')
 
-  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('admin_token') || localStorage.getItem('token')}` })
+  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token') || localStorage.getItem('admin_token')}` })
 
   const fetchUsers = async () => {
     try {

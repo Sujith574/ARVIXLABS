@@ -63,7 +63,7 @@ export default function AdminFoundersPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
-    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
+    const token = localStorage.getItem('token') || localStorage.getItem('admin_token')
     const config = { headers: { Authorization: `Bearer ${token}` } }
 
     try {
@@ -76,7 +76,7 @@ export default function AdminFoundersPage() {
       fetchTeam()
       setEditing(null)
     } catch (err) {
-      alert("Unauthorized: Executive Override Required.")
+      alert(err.response?.data?.detail || "Unauthorized: Executive Override Required.")
     } finally {
       setSaving(false)
     }
@@ -84,7 +84,7 @@ export default function AdminFoundersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to purge this record from existence?")) return
-    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
+    const token = localStorage.getItem('token') || localStorage.getItem('admin_token')
     const config = { headers: { Authorization: `Bearer ${token}` } }
 
     try {

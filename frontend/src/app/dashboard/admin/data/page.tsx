@@ -28,7 +28,7 @@ export default function DataIngestionPage() {
       formData.append('source_type', fileType)
       formData.append('description', description)
 
-      const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
+      const token = localStorage.getItem('token') || localStorage.getItem('admin_token')
       const res = await axios.post(`${API}/api/v1/ai/ingest`, formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       })

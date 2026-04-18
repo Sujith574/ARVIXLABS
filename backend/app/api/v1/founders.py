@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.models import TeamMember
-from app.core.security import require_role
+from app.core.security import get_current_admin
 from pydantic import BaseModel
 from typing import Optional, List
 import uuid
@@ -29,14 +29,20 @@ async def get_team(db: Session = Depends(get_db)):
     team = db.query(TeamMember).all()
     if not team:
         # Initial seeding if empty
-        return [
-            {
-                "id": "1", "name": "Sujit Kumar", "role": "Founder & CEO",
-                "bio": "Visionary technologist driving AI-powered governance transformation.",
-                "image_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sujit", 
-                "linkedin": "#", "github": "#", "twitter": "#", "type": "founder"
-            }
-        ]
+        seed_member = TeamMember(
+            name="Sujit Kumar",
+            role="Founder & CEO",
+            bio="Visionary technologist driving AI-powered governance transformation.",
+            image_url="https://api.dicebear.com/7.x/avataaars/svg?seed=Sujit",
+            linkedin="#",
+            github="#",
+            twitter="#",
+            type="founder"
+        )
+        db.add(seed_member)
+        db.commit()
+        db.refresh(seed_member)
+        return [seed_member]
     return team
 
 @router.get("/founders", response_model=List[PersonOut])
@@ -51,7 +57,7 @@ async def get_developers(db: Session = Depends(get_db)):
 async def add_person(
     payload: PersonBase,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_role("super_admin"))
+    current_user: dict = Depends(get_current_admin)
 ):
     new_person = TeamMember(**payload.dict())
     db.add(new_person)
@@ -64,7 +70,7 @@ async def update_person(
     person_id: str,
     payload: PersonBase,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_role("super_admin"))
+    current_user: dict = Depends(get_current_admin)
 ):
     person = db.query(TeamMember).filter(TeamMember.id == person_id).first()
     if not person:
@@ -81,7 +87,7 @@ async def update_person(
 async def delete_person(
     person_id: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_role("super_admin"))
+    current_user: dict = Depends(get_current_admin)
 ):
     person = db.query(TeamMember).filter(TeamMember.id == person_id).first()
     if not person:

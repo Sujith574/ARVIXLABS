@@ -33,7 +33,7 @@ async def get_public_overview(db: Session = Depends(get_db)):
 
 @router.get("/overview")
 async def get_overview(
-    current_user: dict = Depends(require_role("analyst", "officer", "super_admin")),
+    current_user: dict = Depends(require_role("analyst", "officer", "admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     total = db.query(Complaint).count()
@@ -55,7 +55,7 @@ async def get_overview(
 
 @router.get("/by-department")
 async def by_department(
-    current_user: dict = Depends(require_role("analyst", "officer", "super_admin")),
+    current_user: dict = Depends(require_role("analyst", "officer", "admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     results = db.query(
@@ -68,7 +68,7 @@ async def by_department(
 
 @router.get("/by-category")
 async def by_category(
-    current_user: dict = Depends(require_role("analyst", "officer", "super_admin")),
+    current_user: dict = Depends(require_role("analyst", "officer", "admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     results = db.query(
@@ -80,7 +80,7 @@ async def by_category(
 
 @router.get("/by-priority")
 async def by_priority(
-    current_user: dict = Depends(require_role("analyst", "officer", "super_admin")),
+    current_user: dict = Depends(require_role("analyst", "officer", "admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     results = db.query(
@@ -93,7 +93,7 @@ async def by_priority(
 
 @router.get("/trend")
 async def get_trend(
-    current_user: dict = Depends(require_role("analyst", "officer", "super_admin")),
+    current_user: dict = Depends(require_role("analyst", "officer", "admin", "super_admin")),
     db: Session = Depends(get_db)
 ):
     """Monthly complaint trend (last 6 months). Supports SQLite and Postgres."""

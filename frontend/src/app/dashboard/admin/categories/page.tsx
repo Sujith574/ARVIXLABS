@@ -19,7 +19,7 @@ export default function AdminCategoriesPage() {
   const [editData, setEditData] = useState<Partial<Category>>({})
   const [saving, setSaving] = useState(false)
 
-  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` })
+  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('admin_token') || localStorage.getItem('token')}` })
 
   const fetchCats = async () => {
     try {

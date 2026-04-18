@@ -17,7 +17,7 @@ export default function AdminDepartmentsPage() {
   const [editData, setEditData] = useState<Partial<Dept>>({})
   const [saving, setSaving] = useState(false)
 
-  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` })
+  const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('admin_token') || localStorage.getItem('token')}` })
 
   const fetchDepts = async () => {
     try {

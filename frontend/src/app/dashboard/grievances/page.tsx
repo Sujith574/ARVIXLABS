@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Search, Filter, Eye, ChevronDown } from 'lucide-react'
+import { FileText, Search, Filter, Eye, ChevronDown, Brain, Clock } from 'lucide-react'
 import Topbar from '@/components/layout/Topbar'
 import Link from 'next/link'
 import axios from 'axios'
@@ -42,7 +42,10 @@ export default function GrievancesListPage() {
   }, [])
 
   const filtered = complaints.filter(c => {
-    const matchSearch = search === '' || c.title.toLowerCase().includes(search.toLowerCase()) || c.ticket_id.includes(search)
+    if (!c) return false
+    const matchSearch = search === '' || 
+      (c.title || '').toLowerCase().includes(search.toLowerCase()) || 
+      (c.ticket_id || '').toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter === '' || c.status === statusFilter
     return matchSearch && matchStatus
   })
@@ -132,7 +135,7 @@ export default function GrievancesListPage() {
                       </td>
                       <td className="px-6 py-5">
                         <span className={`badge ${statusStyles[c.status] || 'status-pending'} text-[10px] font-black`}>
-                          {c.status.replace('_', ' ')}
+                          {(c.status || 'SUBMITTED').replace('_', ' ')}
                         </span>
                       </td>
                       <td className="px-6 py-5">

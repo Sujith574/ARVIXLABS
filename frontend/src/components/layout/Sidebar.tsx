@@ -128,12 +128,16 @@ export default function Sidebar({ userRole = 'citizen', userName = 'User' }: Sid
 
       {/* Terminal Footer */}
       <div className="px-4 pb-8 border-t border-white/5 pt-6 bg-white/[0.01]">
-        <Link href="/">
-          <div className="nav-item text-red-500 hover:bg-red-500/10 hover:border-red-500/20 group">
-            <LogOut className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
-            {!collapsed && <span className="text-xs font-black uppercase tracking-widest">Terminate Session</span>}
-          </div>
-        </Link>
+        <button
+          onClick={() => {
+            localStorage.clear()
+            window.location.href = '/'
+          }}
+          className="w-full nav-item text-red-500 hover:bg-red-500/10 hover:border-red-500/20 group"
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
+          {!collapsed && <span className="text-xs font-black uppercase tracking-widest">Terminate Session</span>}
+        </button>
       </div>
     </div>
   )

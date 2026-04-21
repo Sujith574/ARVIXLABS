@@ -29,7 +29,7 @@ export default function SubmitGrievancePage() {
     const token = localStorage.getItem('token')
 
     try {
-      const res = await axios.post(`${API}/api/v1/grievances/`, form, {
+      const res = await axios.post(`${API}/api/v1/grievances/submit`, form, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setSubmitted(res.data)

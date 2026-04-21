@@ -57,7 +57,8 @@ export default function GrievanceDetailsPage() {
   const fetchData = async () => {
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     try {
-      const res = await axios.get(`${API}/api/v1/grievances/track/${id}`, {
+      const endpoint = isAdmin ? `${API}/api/v1/grievances/admin/${id}` : `${API}/api/v1/grievances/track/${id}`
+      const res = await axios.get(endpoint, {
          headers: { Authorization: `Bearer ${token}` }
       })
       setData(res.data)

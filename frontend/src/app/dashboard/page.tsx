@@ -33,7 +33,15 @@ export default function DashboardPage() {
       const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
       const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
-      axios.get(`${API}/api/v1/ai/stats`, { headers }).then(r => setStats(r.data)).catch(() => {})
+      axios.get(`${API}/api/v1/analytics/overview`, { headers }).then(r => {
+        const data = r.data
+        setStats({
+          total_complaints: data.total || 0,
+          resolved: data.resolved || 0,
+          pending: data.pending || 0,
+          resolution_rate: data.resolution_rate || 0
+        })
+      }).catch(() => {})
       axios.get(`${API}/api/v1/analytics/by-department`, { headers }).then(r => setDepartmentData(r.data)).catch(() => {})
       axios.get(`${API}/api/v1/analytics/trend`, { headers }).then(r => setTrendData(r.data)).catch(() => {})
       axios.get(`${API}/api/v1/analytics/by-priority`, { headers }).then(r => setPriorityData(r.data)).catch(() => {})

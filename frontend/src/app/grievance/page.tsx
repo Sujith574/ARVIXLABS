@@ -27,13 +27,16 @@ import Navbar from '@/components/layout/Navbar'
 
 const ChatBot = dynamic(() => import('@/components/ui/ChatBot'), { ssr: false })
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://arvix-backend-666036188871.asia-south1.run.app'
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const STATUS_STYLE: Record<string, any> = {
   submitted:   { color: '#38bdf8', label: 'Active Node',   icon: Clock },
+  under_review: { color: '#a855f7', label: 'Under Review',   icon: Zap },
+  in_progress: { color: '#a855f7', label: 'Processing',   icon: Zap },
   'in-review': { color: '#a855f7', label: 'Processing',   icon: Zap },
   resolved:    { color: '#10B981', label: 'Resolved',    icon: CheckCircle },
-  rejected:    { color: '#EF4444', label: 'Rejected',    icon: AlertCircle },
+  closed:    { color: '#64748b', label: 'Closed',    icon: AlertCircle },
+  rejected:    { color: '#64748b', label: 'Closed',    icon: AlertCircle },
 }
 
 const PRIORITY_STYLE: Record<string, any> = {

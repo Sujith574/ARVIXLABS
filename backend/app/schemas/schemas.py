@@ -77,17 +77,21 @@ class ComplaintOut(BaseModel):
     ticket_id: str
     title: str
     description: str
-    status: ComplaintStatus
-    priority: Priority
+    status: str
+    priority: str
+    submitter_name: Optional[str] = "Anonymous"
+    submitter_email: Optional[str] = None
     ai_category: Optional[str]
     ai_priority: Optional[str]
     ai_summary: Optional[str]
     department_id: Optional[str]
     category_id: Optional[str]
+    remarks: Optional[str]
     attachment_url: Optional[str]
     sla_deadline: Optional[datetime]
     resolved_at: Optional[datetime]
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

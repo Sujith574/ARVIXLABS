@@ -9,7 +9,8 @@ import uuid, json, os, random, string
 from sqlalchemy.orm import Session
 from app.db.database import get_db, ComplaintStatus, Priority
 from app.models.models import Complaint, User, Department, Category
-from app.core.security import get_current_admin
+from app.core.security import get_current_admin, get_current_user
+from app.services.mail_service import mail_service
 
 router = APIRouter(prefix="/grievances", tags=["Grievances"])
 
@@ -35,7 +36,7 @@ async def _classify(title: str, description: str) -> dict:
                 "Internalize this grievance and reply with JSON ONLY.\n"
                 "Fields: category (Roads/Water/Electricity/Healthcare/Education/Other), "
                 "priority (low/medium/high/critical), department (Public Works/Water Board/etc), "
-                "summary (1 sentence).\n\nGrievance: " + text
+                "summary (1 sentence).\n\Grievance: " + text
             )
             
             # Wrap in executor to handle potential library blocking or network hangs
@@ -53,7 +54,6 @@ async def _classify(title: str, description: str) -> dict:
         print(f"[GRIEVANCE] AI Classification timed out for: {title[:50]}...")
     except Exception as e:
         print(f"[GRIEVANCE] AI Classification error: {e}")
-        pass
     
     # Rule-based fallback
     cats = {"road": "Roads", "water": "Water", "electric": "Electricity",
@@ -66,8 +66,6 @@ async def _classify(title: str, description: str) -> dict:
         "summary": title[:120]
     }
 
-from app.services.mail_service import mail_service
-
 # ── Schemas ────────────────────────────────────────────────────────────────────
 
 class GrievanceIn(BaseModel):
@@ -75,11 +73,26 @@ class GrievanceIn(BaseModel):
     description: str
     submitter_name: Optional[str] = "Anonymous"
     submitter_email: Optional[str] = None
+    category_id: Optional[str] = None
 
 class StatusUpdate(BaseModel):
-    status: ComplaintStatus
+    status: str
     remarks: Optional[str] = None
     note: Optional[str] = None # alias for remarks if needed
+
+def _normalize_status(raw_status: str) -> ComplaintStatus:
+    normalized = (raw_status or "").strip().lower().replace("-", "_")
+    aliases = {
+        "in_review": ComplaintStatus.under_review,
+        "rejected": ComplaintStatus.closed,
+    }
+    if normalized in aliases:
+        return aliases[normalized]
+    try:
+        return ComplaintStatus(normalized)
+    except ValueError:
+        allowed = ", ".join([s.value for s in ComplaintStatus])
+        raise HTTPException(status_code=422, detail=f"Invalid status '{raw_status}'. Allowed: {allowed}")
 
 # ── PUBLIC endpoints ───────────────────────────────────────────────────────────
 
@@ -113,6 +126,7 @@ async def submit_grievance(payload: GrievanceIn, db: Session = Depends(get_db)):
             submitter_email=payload.submitter_email,
             status=ComplaintStatus.submitted,
             priority=db_priority,
+            category_id=payload.category_id,
             ai_category=ai_data.get("category", "Other"),
             ai_priority=ai_data.get("priority", "medium"),
             ai_summary=ai_data.get("summary", ""),
@@ -122,11 +136,10 @@ async def submit_grievance(payload: GrievanceIn, db: Session = Depends(get_db)):
         db.add(new_complaint)
         db.commit()
         db.refresh(new_complaint)
-        print(f"[GRIEVANCE] Successfully created ticket: {new_complaint.ticket_id} (ID: {new_complaint.id})")
+        print(f"[GRIEVANCE] Successfully created ticket: {new_complaint.ticket_id}")
 
         # Notify via Email
         try:
-            from app.services.mail_service import mail_service
             # 1. Internal Alert (to Arvix Team)
             mail_service.send_notification(
                 subject=f"New Grievance: {new_complaint.ticket_id}",
@@ -139,7 +152,7 @@ async def submit_grievance(payload: GrievanceIn, db: Session = Depends(get_db)):
                 )
             )
             
-            # 2. External Confirmation (to Citizen - Attractive Template)
+            # 2. External Confirmation (to Citizen)
             if payload.submitter_email:
                 mail_service.send_ticket_confirmation(
                     to_email=payload.submitter_email,
@@ -153,13 +166,10 @@ async def submit_grievance(payload: GrievanceIn, db: Session = Depends(get_db)):
 
     except Exception as db_err:
         db.rollback()
-        import traceback
-        error_details = traceback.format_exc()
-        print(f"[GRIEVANCE] Database transaction critical failure for ticket {payload.title}:")
-        print(error_details)
+        print(f"[GRIEVANCE] Database transaction critical failure: {db_err}")
         raise HTTPException(
             status_code=500, 
-            detail=f"Grievance submission failed at the database layer. Error: {str(db_err)}"
+            detail=f"Grievance submission failed. Error: {str(db_err)}"
         )
 
 @router.get("/track/{ticket_id}")
@@ -188,19 +198,42 @@ async def update_status(grievance_id: str, payload: StatusUpdate, db: Session = 
     item = db.query(Complaint).filter(Complaint.id == grievance_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Grievance not found")
+
+    old_status = item.status
+    normalized_status = _normalize_status(payload.status)
+    item.status = normalized_status
     
-    item.status = payload.status
     if payload.remarks:
         item.remarks = payload.remarks
     elif payload.note:
         item.remarks = payload.note
-        
-    if payload.status == ComplaintStatus.resolved:
+
+    if normalized_status == ComplaintStatus.resolved:
         item.resolved_at = datetime.utcnow()
+    else:
+        item.resolved_at = None
     
     item.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(item)
+
+    # Notify user of status change if email exists
+    if item.submitter_email and str(old_status) != str(normalized_status):
+        try:
+            status_label = normalized_status.value.replace("_", " ").upper()
+            mail_service.send_notification(
+                subject=f"Grievance Updated: {item.ticket_id}",
+                body=(
+                    f"Your grievance (Ticket: {item.ticket_id}) has been updated.\n\n"
+                    f"New Status: {status_label}\n"
+                    f"Admin Remarks: {item.remarks or 'No specific remarks provided.'}\n\n"
+                    f"You can track the live status at the Arvix Portal."
+                ),
+                to_emails=[item.submitter_email]
+            )
+        except Exception as e:
+            print(f"[GRIEVANCE] Status update email failed: {e}")
+
     return item
 
 @router.delete("/admin/{grievance_id}")

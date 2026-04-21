@@ -49,15 +49,21 @@ export default function GrievanceDetailsPage() {
   const [error, setError] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
 
+  const hasAdminAccess = () => {
+    const role = localStorage.getItem('role')
+    return role === 'admin' || role === 'super_admin' || role === 'officer'
+  }
+
   useEffect(() => {
-    setIsAdmin(localStorage.getItem('role') === 'admin' || localStorage.getItem('role') === 'super_admin')
-    fetchData()
+    const adminAccess = hasAdminAccess()
+    setIsAdmin(adminAccess)
+    fetchData(adminAccess)
   }, [id])
 
-  const fetchData = async () => {
+  const fetchData = async (adminAccess = isAdmin) => {
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     try {
-      const endpoint = isAdmin ? `${API}/api/v1/grievances/admin/${id}` : `${API}/api/v1/grievances/track/${id}`
+      const endpoint = adminAccess ? `${API}/api/v1/grievances/admin/${id}` : `${API}/api/v1/grievances/track/${id}`
       const res = await axios.get(endpoint, {
          headers: { Authorization: `Bearer ${token}` }
       })
@@ -122,7 +128,7 @@ export default function GrievanceDetailsPage() {
 
            {isAdmin && (
            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/5">
-              {['submitted', 'in_progress', 'resolved'].map(s => (
+              {['submitted', 'under_review', 'in_progress', 'resolved', 'closed'].map(s => (
                 <button
                   key={s}
                   disabled={updating}
@@ -259,7 +265,7 @@ export default function GrievanceDetailsPage() {
                        <div>
                           <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2">Resolution Clock</p>
                           <p className="text-base font-black text-emerald-500 tabular-nums">
-                             {new Date(data.sla_deadline).toLocaleDateString()}
+                             {data.sla_deadline ? new Date(data.sla_deadline).toLocaleDateString() : 'Not Assigned'}
                           </p>
                        </div>
                     </div>

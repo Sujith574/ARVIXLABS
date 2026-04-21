@@ -9,6 +9,7 @@ import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/admin-login", auto_error=False)
+ADMIN_ALLOWED_ROLES = {"admin", "super_admin", "officer"}
 
 # ── Single Admin Credentials (env-based) ───────────────────────────────────────
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
@@ -41,7 +42,7 @@ async def get_current_admin(token: str = Depends(oauth2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     payload = decode_token(token)
-    if payload is None or payload.get("role") not in ["admin", "super_admin"]:
+    if payload is None or payload.get("role") not in ADMIN_ALLOWED_ROLES:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired admin token",

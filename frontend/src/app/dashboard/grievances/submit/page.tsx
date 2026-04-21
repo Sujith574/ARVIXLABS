@@ -27,9 +27,14 @@ export default function SubmitGrievancePage() {
     setLoading(true)
     setError('')
     const token = localStorage.getItem('token')
+    const finalForm = {
+      ...form,
+      submitter_name: localStorage.getItem('name') || 'Anonymous',
+      submitter_email: localStorage.getItem('email') || ''
+    }
 
     try {
-      const res = await axios.post(`${API}/api/v1/grievances/submit`, form, {
+      const res = await axios.post(`${API}/api/v1/grievances/submit`, finalForm, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setSubmitted(res.data)

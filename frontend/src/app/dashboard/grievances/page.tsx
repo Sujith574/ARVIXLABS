@@ -77,6 +77,7 @@ export default function GrievancesListPage() {
                     <option value="under_review">UNDER_REVIEW</option>
                     <option value="in_progress">IN_PROGRESS</option>
                     <option value="resolved">RESOLVED</option>
+                    <option value="closed">CLOSED</option>
                 </select>
                 <Link href="/dashboard/grievances/submit" className="btn-glow whitespace-nowrap text-xs font-black uppercase tracking-widest">
                     + New Handshake

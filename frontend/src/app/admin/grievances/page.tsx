@@ -6,14 +6,15 @@ import { Search, RefreshCw, Eye, CheckCircle, AlertCircle, Clock, Zap, Trash2, C
 import axios from 'axios'
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('admin_token')}` })
+const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('admin_token') || localStorage.getItem('token') || ''}` })
 
-const STATUSES = ['submitted', 'in-review', 'resolved', 'rejected']
+const STATUSES = ['submitted', 'under_review', 'in_progress', 'resolved', 'closed']
 const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
   'submitted':  { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
-  'in-review':  { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  'under_review':  { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  'in_progress':  { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)' },
   'resolved':   { color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  'rejected':   { color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+  'closed':   { color: '#64748b', bg: 'rgba(100,116,139,0.2)' },
 }
 const PRIORITY_COLOR: Record<string, string> = {
   low:'#10b981', medium:'#f59e0b', high:'#f97316', critical:'#ef4444'
@@ -52,7 +53,7 @@ export default function AdminGrievancesPage() {
     try {
       const res = await axios.patch(
         `${API}/api/v1/grievances/admin/${selected.id}/status`,
-        { status: newStatus, note },
+        { status: newStatus, remarks: note },
         { headers: headers() }
       )
       setGrievances(prev => prev.map(g => g.id === selected.id ? res.data : g))
@@ -72,10 +73,10 @@ export default function AdminGrievancesPage() {
   }
 
   const Stats = () => {
-    const counts: Record<string, number> = { submitted:0, 'in-review':0, resolved:0, rejected:0 }
+    const counts: Record<string, number> = { submitted:0, under_review:0, in_progress:0, resolved:0, closed:0 }
     grievances.forEach(g => { if (counts[g.status] !== undefined) counts[g.status]++ })
     return (
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
         {Object.entries(counts).map(([k, v]) => {
           const s = STATUS_CONFIG[k]
           return (
@@ -179,7 +180,7 @@ export default function AdminGrievancesPage() {
                   { l:'Email',     v: selected.submitter_email || '—' },
                   { l:'Category',  v: selected.ai_category },
                   { l:'Priority',  v: selected.ai_priority, color: PRIORITY_COLOR[selected.ai_priority] },
-                  { l:'Department',v: selected.ai_department },
+                  { l:'Department',v: selected.department?.name || 'General' },
                   { l:'Date',      v: new Date(selected.created_at).toLocaleDateString() },
                 ].map(f => (
                   <div key={f.l} className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>

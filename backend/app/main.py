@@ -13,29 +13,30 @@ async def lifespan(app: FastAPI):
         from app.db.database import ApprovedAdmin, SessionLocal, engine
         
         # ── AUTO-MIGRATION ──
-        import sqlite3
-        from app.core.config import settings
-        import os
+        from sqlalchemy import text, inspect
+        from app.db.database import engine
         
-        # Determine DB path (similar to database.py)
-        if "sqlite" in settings.DATABASE_URL:
-            db_path = settings.DATABASE_URL.replace("sqlite:///", "")
-            if not os.path.isabs(db_path):
-                db_path = os.path.join(os.getcwd(), db_path)
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        
+        if "complaints" in tables:
+            existing_columns = [col['name'] for col in inspector.get_columns("complaints")]
+            
+            with engine.begin() as conn:
+                if "remarks" not in existing_columns:
+                    print("[MIGRATION] Injecting 'remarks' column into 'complaints' table...")
+                    conn.execute(text("ALTER TABLE complaints ADD COLUMN remarks TEXT"))
+                
+                if "submitter_name" not in existing_columns:
+                    print("[MIGRATION] Injecting 'submitter_name' column into 'complaints' table...")
+                    conn.execute(text("ALTER TABLE complaints ADD COLUMN submitter_name TEXT"))
+                    
+                if "submitter_email" not in existing_columns:
+                    print("[MIGRATION] Injecting 'submitter_email' column into 'complaints' table...")
+                    conn.execute(text("ALTER TABLE complaints ADD COLUMN submitter_email TEXT"))
         else:
-            db_path = os.path.join(os.getcwd(), "arvix_demo.db")
-
-        if os.path.exists(db_path):
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            cursor.execute("PRAGMA table_info(complaints)")
-            columns = [col[1] for col in cursor.fetchall()]
-            if "remarks" not in columns:
-                print("[MIGRATION] Injecting 'remarks' column into 'complaints' table...")
-                cursor.execute("ALTER TABLE complaints ADD COLUMN remarks TEXT")
-                conn.commit()
-            conn.close()
-
+            print("[MIGRATION] 'complaints' table not found, skipping column injection (will be created by create_all)")
+        
         Base.metadata.create_all(bind=engine)
         
         db = SessionLocal()

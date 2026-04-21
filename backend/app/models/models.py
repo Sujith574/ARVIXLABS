@@ -60,7 +60,9 @@ class Complaint(Base):
     status = Column(Enum(ComplaintStatus), default=ComplaintStatus.submitted)
     priority = Column(Enum(Priority), default=Priority.medium)
 
-    user_id = Column(String, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    submitter_name = Column(String(255), nullable=True)
+    submitter_email = Column(String(255), nullable=True)
     department_id = Column(String, ForeignKey("departments.id"), nullable=True)
     category_id = Column(String, ForeignKey("categories.id"), nullable=True)
     assigned_to = Column(String, ForeignKey("users.id"), nullable=True)

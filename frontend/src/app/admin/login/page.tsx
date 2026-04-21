@@ -45,8 +45,10 @@ export default function AdminLoginPage() {
     try {
       const res = await axios.post(`${API}/api/v1/auth/verify-otp`, { email, otp })
       localStorage.setItem('admin_token', res.data.access_token)
+      localStorage.setItem('role', res.data.role)
+      localStorage.setItem('name', res.data.name || 'Arvix Admin')
       setSuccess('Identity verified. Granting access…')
-      setTimeout(() => router.push('/admin/dashboard'), 1000)
+      setTimeout(() => router.push('/dashboard'), 1000)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid or expired security code.')
     } finally {

@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
 
   const fetchAll = async () => {
     setLoading(true)
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const h = { headers: { Authorization: `Bearer ${token}` } }
     try {
       const [ov, dept, cat, pri] = await Promise.all([

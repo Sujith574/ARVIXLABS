@@ -15,7 +15,8 @@ import {
   ArrowLeft,
   Loader2,
   Lock,
-  MessageSquare
+  MessageSquare,
+  ChevronRight
 } from 'lucide-react'
 import Topbar from '@/components/layout/Topbar'
 import axios from 'axios'
@@ -30,6 +31,14 @@ const statusColors: Record<string, string> = {
   closed:       '#64748b',
 }
 
+const statusStyles: Record<string, string> = {
+  submitted:    'badge-submitted',
+  under_review: 'badge-in-progress',
+  in_progress:  'badge-in-progress',
+  resolved:     'badge-resolved',
+  closed:       'badge-resolved',
+}
+
 export default function GrievanceDetailsPage() {
   const { id } = useParams()
   const router = useRouter()
@@ -38,13 +47,15 @@ export default function GrievanceDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
+    setIsAdmin(localStorage.getItem('role') === 'admin' || localStorage.getItem('role') === 'super_admin')
     fetchData()
   }, [id])
 
   const fetchData = async () => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     try {
       const res = await axios.get(`${API}/api/v1/grievances/track/${id}`, {
          headers: { Authorization: `Bearer ${token}` }
@@ -60,7 +71,7 @@ export default function GrievanceDetailsPage() {
 
   const handleStatusUpdate = async (newStatus: string) => {
     setUpdating(true)
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     try {
       await axios.patch(`${API}/api/v1/grievances/admin/${data.id}/status`, 
         { status: newStatus, remarks: remarks },
@@ -104,10 +115,11 @@ export default function GrievanceDetailsPage() {
         
         {/* Header Action Bar */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-           <button onClick={() => router.back()} className="flex items-center gap-3 text-slate-500 hover:text-white transition-all text-xs font-black uppercase tracking-widest group">
+            <button onClick={() => router.back()} className="flex items-center gap-3 text-slate-500 hover:text-white transition-all text-xs font-black uppercase tracking-widest group">
               <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> Back to Registry
            </button>
 
+           {isAdmin && (
            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/5">
               {['submitted', 'in_progress', 'resolved'].map(s => (
                 <button
@@ -125,6 +137,7 @@ export default function GrievanceDetailsPage() {
                 </button>
               ))}
            </div>
+           )}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -170,6 +183,7 @@ export default function GrievanceDetailsPage() {
                    </div>
                  )}
 
+                 {isAdmin ? (
                  <div className="space-y-6 pt-12 border-t border-white/5">
                     <div className="flex items-center justify-between">
                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
@@ -193,6 +207,18 @@ export default function GrievanceDetailsPage() {
                        </button>
                     </div>
                  </div>
+                 ) : (
+                   data.remarks && (
+                    <div className="space-y-6 pt-12 border-t border-white/5">
+                      <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" /> Official Resolution
+                       </h3>
+                       <div className="text-slate-200 leading-[1.8] font-medium text-base whitespace-pre-wrap bg-emerald-500/5 p-8 rounded-3xl border border-emerald-500/10 shadow-inner">
+                          {data.remarks}
+                       </div>
+                    </div>
+                   )
+                 )}
               </div>
            </div>
 

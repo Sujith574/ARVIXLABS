@@ -24,16 +24,22 @@ export default function DashboardPage() {
   const [trendData, setTrendData] = useState<any[]>([])
   const [priorityData, setPriorityData] = useState<any[]>([])
   const [userName, setUserName] = useState('User')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setUserName(localStorage.getItem('name') || 'User')
-    const token = localStorage.getItem('token')
-    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+    const fetchAll = async () => {
+      setLoading(true)
+      const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
-    axios.get(`${API}/api/v1/ai/stats`).then(r => setStats(r.data)).catch(() => {})
-    axios.get(`${API}/api/v1/analytics/by-department`, { headers }).then(r => setDepartmentData(r.data)).catch(() => {})
-    axios.get(`${API}/api/v1/analytics/trend`, { headers }).then(r => setTrendData(r.data)).catch(() => {})
-    axios.get(`${API}/api/v1/analytics/by-priority`, { headers }).then(r => setPriorityData(r.data)).catch(() => {})
+      axios.get(`${API}/api/v1/ai/stats`, { headers }).then(r => setStats(r.data)).catch(() => {})
+      axios.get(`${API}/api/v1/analytics/by-department`, { headers }).then(r => setDepartmentData(r.data)).catch(() => {})
+      axios.get(`${API}/api/v1/analytics/trend`, { headers }).then(r => setTrendData(r.data)).catch(() => {})
+      axios.get(`${API}/api/v1/analytics/by-priority`, { headers }).then(r => setPriorityData(r.data)).catch(() => {})
+      setLoading(false)
+    }
+    fetchAll()
   }, [])
 
   return (

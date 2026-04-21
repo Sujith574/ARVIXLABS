@@ -31,10 +31,14 @@ export default function GrievancesListPage() {
   const [statusFilter, setStatusFilter] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     axios.get(`${API}/api/v1/grievances/admin/all`, {
       headers: { Authorization: `Bearer ${token}` }
-    }).then(r => setComplaints(r.data)).catch(() => {}).finally(() => setLoading(false))
+    }).then(r => {
+      setComplaints(Array.isArray(r.data) ? r.data : [])
+    }).catch(() => {
+      setComplaints([])
+    }).finally(() => setLoading(false))
   }, [])
 
   const filtered = complaints.filter(c => {

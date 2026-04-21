@@ -87,21 +87,34 @@ async def request_otp(data: OTPRequest, db: Session = Depends(get_db)):
         
         # High-fidelity Security Template
         html_code = f"""
-        <div style="font-family: 'Inter', sans-serif; background: #020617; padding: 40px; border-radius: 24px;">
-            <div style="max-width: 500px; margin: auto; background: #0f172a; border: 1px solid rgba(59,130,246,0.2); padding: 48px; border-radius: 32px; text-align: center;">
-                <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin-bottom: 8px;">Security Protocol</h1>
-                <p style="color: #64748b; font-size: 14px; margin-bottom: 40px;">Neural Oversight Handshake</p>
-                
-                <div style="background: rgba(59,130,246,0.1); border: 1px dashed #3b82f6; border-radius: 24px; padding: 32px; margin-bottom: 40px;">
-                    <p style="color: #3b82f6; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; margin-top:0;">Your Access Token</p>
-                    <div style="color: #ffffff; font-size: 48px; font-weight: 900; letter-spacing: 8px; font-family: monospace;">{otp_code}</div>
+        <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    @media only screen and (max-width: 600px) {{
+                        .container {{ padding: 32px 20px !important; border-radius: 20px !important; }}
+                        .otp-code {{ font-size: 36px !important; letter-spacing: 4px !important; }}
+                    }}
+                </style>
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #020617; font-family: 'Inter', -apple-system, sans-serif;">
+                <div style="padding: 40px 10px;">
+                    <div class="container" style="max-width: 500px; margin: auto; background: #0f172a; border: 1px solid rgba(59,130,246,0.2); padding: 48px; border-radius: 32px; text-align: center;">
+                        <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin-bottom: 8px; margin-top: 0;">Security Protocol</h1>
+                        <p style="color: #64748b; font-size: 14px; margin-bottom: 40px;">Neural Oversight Handshake</p>
+                        
+                        <div style="background: rgba(59,130,246,0.1); border: 1px dashed #3b82f6; border-radius: 24px; padding: 32px; margin-bottom: 40px;">
+                            <p style="color: #3b82f6; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; margin-top:0;">Your Access Token</p>
+                            <div class="otp-code" style="color: #ffffff; font-size: 48px; font-weight: 900; letter-spacing: 8px; font-family: 'JetBrains Mono', monospace;">{otp_code}</div>
+                        </div>
+                        
+                        <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin-bottom: 0;">
+                            If you did not initiate this handshake, please ignore this dispatch. This token expires in 600 seconds.
+                        </p>
+                    </div>
                 </div>
-                
-                <p style="color: #94a3b8; font-size: 13px; line-height: 1.6;">
-                    If you did not initiate this handshake, please ignore this dispatch. This token expires in 600 seconds.
-                </p>
-            </div>
-        </div>
+            </body>
+        </html>
         """
         
         success = mail_service.send_notification(

@@ -177,14 +177,14 @@ async def list_all(db: Session = Depends(get_db), _=Depends(get_current_admin)):
     return db.query(Complaint).order_by(Complaint.created_at.desc()).all()
 
 @router.get("/admin/{grievance_id}")
-async def get_grievance_detail(grievance_id: int, db: Session = Depends(get_db), _=Depends(get_current_admin)):
+async def get_grievance_detail(grievance_id: str, db: Session = Depends(get_db), _=Depends(get_current_admin)):
     item = db.query(Complaint).filter(Complaint.id == grievance_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Grievance not found")
     return item
 
 @router.patch("/admin/{grievance_id}/status")
-async def update_status(grievance_id: int, payload: StatusUpdate, db: Session = Depends(get_db), _=Depends(get_current_admin)):
+async def update_status(grievance_id: str, payload: StatusUpdate, db: Session = Depends(get_db), _=Depends(get_current_admin)):
     item = db.query(Complaint).filter(Complaint.id == grievance_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Grievance not found")

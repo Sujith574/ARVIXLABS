@@ -27,7 +27,7 @@ async def _classify(title: str, description: str) -> dict:
         import google.generativeai as genai, os
         from app.core.config import settings
         
-        api_key = settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")
+        api_key = (settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")).strip()
         if api_key:
             genai.configure(api_key=api_key, transport='rest')
             model = genai.GenerativeModel("gemini-2.0-flash")
